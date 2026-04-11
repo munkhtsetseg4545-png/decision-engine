@@ -18,7 +18,7 @@ QUESTIONS: List[Question] = [
     Question(key="growth_assumption", text="3. Миний growth assumption (өсөлтийн төсөөлөл) бодитой, хэт өөдрөг биш үү?", category="Valuation", weight=1.2, red_flag_threshold=4),
     Question(key="leverage_and_concentration", text="4. Leverage (хөшүүрэг) болон hidden leverage (далд хөшүүрэг: хэт төвлөрөл) байхгүй юу?", category="Risk", weight=1.4, hard_fail_threshold=2, red_flag_threshold=4),
     Question(key="big_picture", text="5. Би detail (нарийн зүйл)-д живээгүй, big picture (том дүр зураг)-ээ алдаагүй юу?", category="Thinking", weight=1.0, red_flag_threshold=4),
-    Question(key="complexity", text="6. Энэ санаа миний circle of competence (ойлгож чадах хүрээ)-д багтахуйц энгийн үү?", category="Thinking", weight=1.1, red_flag_threshold=4),
+    Question(key="complexity", text="6. Би энэ хувьцааг авах/барих/зарах шалтгаанаа энгийнээр, бүрэн ойлгож байна уу?", category="Thinking", weight=1.1, red_flag_threshold=4),
     Question(key="self_limiting", text="7. Би өөрийгөө unnecessary хязгаарлаагүй, жинхэнэ боломжийг хаагаагүй юу?", category="Opportunity", weight=0.8, red_flag_threshold=3),
     Question(key="fresh_start", text="8. Хэрэв өнөөдөр 0-ээс эхэлсэн бол би энэ хувьцааг одоо авах байсан уу? (Fresh start test)", category="Decision", weight=1.5, hard_fail_threshold=2, red_flag_threshold=4),
     Question(key="ego", text="9. Энэ decision миний ego (өөрийгөө зөв гэж батлах хүсэл)-г хамгаалаагүй юу?", category="Temperament", weight=1.2, red_flag_threshold=4),

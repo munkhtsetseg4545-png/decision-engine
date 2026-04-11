@@ -5,10 +5,11 @@ const QUESTIONS = [
   { key:"leverage_and_concentration",text:"4. Leverage болон hidden leverage (хэт төвлөрөл) байхгүй юу?",                                            cat:"Risk",        lo:"Их leverage",         hi:"Leverage байхгүй",   hardFail:2,    redFlag:4 },
   { key:"big_picture",               text:"5. Би detail-д живээгүй, big picture-ээ алдаагүй юу?",                                                    cat:"Thinking",    lo:"Big picture алдсан",  hi:"Тодорхой харж байна",hardFail:null, redFlag:4 },
   { key:"complexity",                text:"6. Би энэ хувьцааг авах/барих/зарах шалтгаанаа энгийнээр, бүрэн ойлгож байна уу?",                                          cat:"Thinking",    lo:"Маш төвөгтэй",        hi:"Энгийн",             hardFail:null, redFlag:4 },
-  { key:"self_limiting",             text:"7. Би өөрийгөө unnecessary хязгаарлаагүй, жинхэнэ боломжийг хаагаагүй юу?",                              cat:"Opportunity", lo:"Хязгаарласан",        hi:"Чөлөөтэй",           hardFail:null, redFlag:3 },
+  { key:"self_limiting",             text:"7. Би өөрийн зуршил, айдсаасаа болж сайн боломжийг өөрөө хааж байна уу?",                              cat:"Opportunity", lo:"Хязгаарласан",        hi:"Чөлөөтэй",           hardFail:null, redFlag:3 },
   { key:"fresh_start",               text:"8. Хэрэв өнөөдөр 0-ээс эхэлсэн бол би энэ хувьцааг одоо авах байсан уу? (Fresh start test)",             cat:"Decision",    lo:"Авахгүй байсан",      hi:"Тодорхой авна",      hardFail:2,    redFlag:4 },
   { key:"ego",                       text:"9. Энэ decision миний ego (өөрийгөө зөв гэж батлах хүсэл)-г хамгаалаагүй юу?",                           cat:"Temperament", lo:"Ego давамгайлж байна",hi:"Ego байхгүй",        hardFail:null, redFlag:4 },
-  { key:"survival",                  text:"10. Worst-case scenario-д би survive чадах уу?",                                                          cat:"Risk",        lo:"Survive хийхгүй",    hi:"Мэдээж survive",     hardFail:3,    redFlag:4 },
+  { key:"survival",                  text:"10. .Хэрэв энэ хөрөнгө оруулалт буруу болбол,
+  би санхүүгийн болон сэтгэлзүйн хувьд дааж, үргэлжлүүлэн тоглож чадах уу?",                                                          cat:"Risk",        lo:"Survive хийхгүй",    hi:"Мэдээж survive",     hardFail:3,    redFlag:4 },
 ];
 
 let current = 0;

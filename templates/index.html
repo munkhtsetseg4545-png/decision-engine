@@ -18,18 +18,34 @@
         <span class="header-layer">Layer 2</span>
         <span class="header-name">Decision Engine — Scoring</span>
       </div>
-      <div class="header-timer" id="timer">00:00</div>
+      <div class="header-right">
+        <div class="header-timer" id="timer">00:00</div>
+        <a href="/history" class="history-link">History →</a>
+      </div>
     </div>
     <div class="progress-track">
       <div class="progress-fill" id="progressFill"></div>
     </div>
   </header>
 
+  <!-- TICKER INPUT -->
+  <main class="main" id="tickerView">
+    <div class="quiz-shell">
+      <div class="ticker-card">
+        <p class="ticker-label">Хувьцааны нэр (Ticker)</p>
+        <input type="text" id="tickerInput" class="ticker-input" placeholder="AAPL, AMD, TSLA ..." maxlength="10" autocomplete="off">
+        <p class="ticker-hint">Scoring эхлэхийн өмнө ticker оруулна уу</p>
+        <button class="btn btn-primary" onclick="startQuiz()">Эхлэх →</button>
+      </div>
+    </div>
+  </main>
+
   <!-- QUIZ -->
-  <main class="main" id="quizView">
+  <main class="main hidden" id="quizView">
     <div class="quiz-shell">
       <div class="q-counter">
         <span id="qNum">01</span><span class="q-total"> / 10</span>
+        <span class="q-ticker" id="qTicker"></span>
       </div>
       <div class="q-card">
         <div class="q-meta-row">
@@ -63,7 +79,6 @@
   <!-- RESULT -->
   <main class="main hidden" id="resultView">
     <div class="result-shell">
-
       <div class="result-hero">
         <div class="result-score-wrap">
           <svg class="score-ring" viewBox="0 0 120 120">
@@ -77,6 +92,7 @@
           </div>
         </div>
         <div class="result-verdict">
+          <div class="result-ticker-badge" id="resTicker"></div>
           <div class="verdict-badge" id="verdictBadge"></div>
           <p class="verdict-interp" id="verdictInterp"></p>
         </div>
@@ -105,6 +121,7 @@
 
       <div class="nav-row centered">
         <button class="btn btn-ghost" onclick="restart()">Дахин эхлэх</button>
+        <a href="/history" class="btn btn-primary">History харах →</a>
       </div>
     </div>
   </main>

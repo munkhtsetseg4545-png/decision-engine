@@ -13,6 +13,7 @@ const QUESTIONS = [
 
 let current = 0;
 let answers = {};
+let ticker = "";
 let timerInterval = null;
 
 function startTimer() {
@@ -24,6 +25,27 @@ function startTimer() {
     document.getElementById('timer').textContent = m+':'+s;
   }, 1000);
 }
+
+function startQuiz() {
+  const input = document.getElementById('tickerInput').value.trim().toUpperCase();
+  if (!input) {
+    document.getElementById('tickerInput').focus();
+    return;
+  }
+  ticker = input;
+  document.getElementById('tickerView').classList.add('hidden');
+  document.getElementById('quizView').classList.remove('hidden');
+  document.getElementById('qTicker').textContent = ticker;
+  startTimer();
+  renderQ();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('tickerInput');
+  if (input) {
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') startQuiz(); });
+  }
+});
 
 function renderQ() {
   const q = QUESTIONS[current];
@@ -69,7 +91,7 @@ async function submitScores() {
   const res = await fetch('/score', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({answers: payload}),
+    body: JSON.stringify({ answers: payload, ticker: ticker }),
   });
   showResult(await res.json());
 }
@@ -78,9 +100,12 @@ function showResult(data) {
   document.getElementById('quizView').classList.add('hidden');
   document.getElementById('resultView').classList.remove('hidden');
   clearInterval(timerInterval);
+
   document.getElementById('resScore').textContent = data.score;
+  document.getElementById('resTicker').textContent = ticker;
   const offset = 326.7 - (data.score / 100) * 326.7;
   setTimeout(() => { document.getElementById('ringFill').style.strokeDashoffset = offset; }, 100);
+
   const badge = document.getElementById('verdictBadge');
   badge.textContent = data.decision;
   const cls = data.decision === 'STRONG BUY / ADD' ? 'badge-go'
@@ -89,6 +114,7 @@ function showResult(data) {
     : 'badge-nogo';
   badge.className = 'verdict-badge ' + cls;
   document.getElementById('verdictInterp').textContent = data.interpretation;
+
   const hfWrap = document.getElementById('hardFailWrap');
   if (data.hard_fails && data.hard_fails.length) {
     hfWrap.innerHTML = '<h3 class="section-heading">Hard fail triggers</h3>' +
@@ -97,11 +123,13 @@ function showResult(data) {
   } else {
     hfWrap.style.display = 'none';
   }
+
   let catHtml = '';
   for (const [cat, val] of Object.entries(data.category_breakdown)) {
     catHtml += `<div class="cat-row"><span class="cat-label">${cat}</span><div class="cat-bar-track"><div class="cat-bar-fill" style="width:${val}%"></div></div><span class="cat-score-val">${val}/100</span></div>`;
   }
   document.getElementById('catBreakdown').innerHTML = catHtml;
+
   let flagHtml = '';
   if (data.red_flags.length) {
     data.red_flags.forEach(f => { flagHtml += `<div class="flag-item">${f}</div>`; });
@@ -110,6 +138,7 @@ function showResult(data) {
   }
   document.getElementById('flagsWrap').innerHTML = flagHtml;
   document.getElementById('sizingBox').textContent = data.action;
+
   let qsHtml = '';
   for (const [key, val] of Object.entries(data.normalized_scores)) {
     const isHardFail = data.hard_fails && data.hard_fails.includes(key);
@@ -121,11 +150,11 @@ function showResult(data) {
 function restart() {
   current = 0;
   answers = {};
+  ticker = "";
+  clearInterval(timerInterval);
   document.getElementById('resultView').classList.add('hidden');
-  document.getElementById('quizView').classList.remove('hidden');
-  startTimer();
-  renderQ();
+  document.getElementById('tickerView').classList.remove('hidden');
+  document.getElementById('tickerInput').value = '';
+  document.getElementById('timer').textContent = '00:00';
+  document.getElementById('progressFill').style.width = '0%';
 }
-
-startTimer();
-renderQ();

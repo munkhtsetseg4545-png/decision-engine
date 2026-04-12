@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine — History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-mark">DE</div>
+      <div class="header-title">
+        <span class="header-layer">Layer 2</span>
+        <span class="header-name">Scoring History</span>
+      </div>
+      <div class="header-right">
+        <a href="/" class="history-link">← Scoring</a>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  </header>
+
+  <main class="main" style="align-items:flex-start;">
+    <div class="result-shell">
+
+      <!-- Search -->
+      <form method="get" action="/history" class="search-row">
+        <input type="text" name="ticker" value="{{ ticker }}" placeholder="Ticker хайх... (AAPL)" class="ticker-input" style="max-width:200px;">
+        <button type="submit" class="btn btn-primary">Хайх</button>
+        {% if ticker %}
+        <a href="/history" class="btn btn-ghost">Бүгд харах</a>
+        {% endif %}
+      </form>
+
+      {% if sessions %}
+      <div class="history-summary">
+        <span class="h-count">{{ sessions|length }} scoring</span>
+        {% if ticker %}<span class="h-ticker">{{ ticker }}</span>{% endif %}
+      </div>
+
+      {% for s in sessions %}
+      <div class="history-card">
+        <div class="history-card-header">
+          <span class="h-ticker-badge">{{ s.ticker }}</span>
+          <span class="h-date">{{ s.created_at }}</span>
+          <span class="h-score">{{ s.total_score }}/100</span>
+          <span class="verdict-badge h-decision
+            {% if 'STRONG' in s.decision %}badge-go
+            {% elif 'SMALL' in s.decision or 'WATCHLIST' in s.decision %}badge-watch
+            {% elif 'HOLD' in s.decision %}badge-hold
+            {% else %}badge-nogo{% endif %}">
+            {{ s.decision }}
+          </span>
+        </div>
+
+        <p class="h-interp">{{ s.interpretation }}</p>
+
+        {% if s.red_flags %}
+        <div class="h-flags">
+          {% for f in s.red_flags %}
+          <span class="h-flag-item">{{ f }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if s.hard_fails %}
+        <div class="h-hardflags">
+          {% for f in s.hard_fails %}
+          <span class="h-hardfail-item">⚠ {{ f }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="h-answers">
+          {% for key, val in s.answers.items() %}
+          <span class="h-ans-item">{{ key.replace('_', ' ') }}: {{ val }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+
+      {% else %}
+      <div class="empty-state">
+        <p>Scoring history хоосон байна.</p>
+        <a href="/" class="btn btn-primary" style="margin-top:1rem;">Scoring эхлэх →</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine — Deep Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-mark">DE</div>
+      <div class="header-title">
+        <span class="header-layer">Layer 1</span>
+        <span class="header-name">Deep Work — 60 мин</span>
+      </div>
+      <div class="header-right">
+        <div class="header-timer" id="phaseTimer">20:00</div>
+        <a href="/" class="history-link">← Нүүр</a>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </header>
+
+  <!-- TICKER -->
+  <main class="main" id="tickerView">
+    <div class="quiz-shell">
+      <div class="ticker-card">
+        <p class="ticker-label">Хувьцааны нэр (Ticker)</p>
+        <input type="text" id="tickerInput" class="ticker-input" placeholder="AAPL, AMD, TSLA ..." maxlength="10" autocomplete="off">
+        <p class="ticker-hint">Deep Work эхлэхийн өмнө ticker оруулна уу</p>
+        <button class="btn btn-primary" onclick="startDeepWork()">Эхлэх →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- PHASES -->
+  <main class="main hidden" id="phaseView">
+    <div class="quiz-shell" style="max-width:680px;">
+
+      <div class="phase-header">
+        <div class="q-counter">
+          Phase <span id="phaseNum">1</span><span class="q-total"> / 3</span>
+          <span class="q-ticker" id="phaseTicker"></span>
+        </div>
+        <div class="phase-title" id="phaseTitle"></div>
+        <div class="phase-timer-wrap">
+          <div class="phase-timer-bar"><div class="phase-timer-fill" id="timerFill"></div></div>
+          <span class="phase-timer-label" id="timerLabel">20:00</span>
+        </div>
+      </div>
+
+      <div id="questionsWrap"></div>
+
+      <div class="nav-row" style="margin-top:1.5rem;">
+        <button class="btn btn-ghost" id="btnSkipTimer" onclick="skipTimer()">Timer алгасах</button>
+        <button class="btn btn-primary" id="btnNextPhase" onclick="nextPhase()">Дараах →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- THESIS -->
+  <main class="main hidden" id="thesisView">
+    <div class="result-shell">
+      <div class="result-hero">
+        <div class="result-verdict" style="flex:1;">
+          <div class="result-ticker-badge" id="thesisTicker"></div>
+          <div class="verdict-badge badge-go">Deep Work Дууслаа</div>
+          <p class="verdict-interp">Thesis үүслээ. Одоо Layer 2 Scoring руу орно уу.</p>
+        </div>
+      </div>
+
+      <section class="result-section full-width" style="margin-bottom:1rem;">
+        <h3 class="section-heading">Investment Thesis</h3>
+        <div class="thesis-box" id="thesisBox"></div>
+      </section>
+
+      <div class="nav-row centered">
+        <button class="btn btn-ghost" onclick="restartDW()">Дахин эхлэх</button>
+        <a href="/scoring" class="btn btn-primary">Layer 2 Scoring →</a>
+      </div>
+    </div>
+  </main>
+
+</div>
+<script>
+const PHASES = {{ phases | tojson }};
+let currentPhase = 0;
+let ticker = "";
+let allAnswers = {};
+let timerInterval = null;
+let secondsLeft = 0;
+
+function startDeepWork() {
+  const input = document.getElementById('tickerInput').value.trim().toUpperCase();
+  if (!input) { document.getElementById('tickerInput').focus(); return; }
+  ticker = input;
+  document.getElementById('tickerView').classList.add('hidden');
+  document.getElementById('phaseView').classList.remove('hidden');
+  document.getElementById('phaseTicker').textContent = ticker;
+  loadPhase(0);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('tickerInput');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') startDeepWork(); });
+});
+
+function loadPhase(idx) {
+  const phase = PHASES[idx];
+  currentPhase = idx;
+  document.getElementById('phaseNum').textContent = idx + 1;
+  document.getElementById('phaseTitle').textContent = phase.title;
+  document.getElementById('progressFill').style.width = ((idx) / 3 * 100) + '%';
+
+  let html = '';
+  phase.questions.forEach(q => {
+    const saved = allAnswers[q.key] || '';
+    html += `<div class="q-card" style="margin-bottom:1rem;">
+      <p class="q-text" style="font-size:17px;margin-bottom:1rem;">${q.text}</p>
+      <textarea id="ans_${q.key}" class="dw-textarea" placeholder="Энд бичнэ...">${saved}</textarea>
+    </div>`;
+  });
+  document.getElementById('questionsWrap').innerHTML = html;
+  startPhaseTimer(phase.duration_min);
+}
+
+function startPhaseTimer(minutes) {
+  clearInterval(timerInterval);
+  secondsLeft = minutes * 60;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    updateTimerDisplay();
+    if (secondsLeft <= 0) { clearInterval(timerInterval); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = String(Math.floor(secondsLeft / 60)).padStart(2, '0');
+  const s = String(secondsLeft % 60).padStart(2, '0');
+  const label = m + ':' + s;
+  document.getElementById('phaseTimer').textContent = label;
+  document.getElementById('timerLabel').textContent = label;
+  const total = PHASES[currentPhase].duration_min * 60;
+  const pct = (secondsLeft / total) * 100;
+  document.getElementById('timerFill').style.width = pct + '%';
+}
+
+function skipTimer() {
+  clearInterval(timerInterval);
+  secondsLeft = 0;
+  updateTimerDisplay();
+}
+
+function saveCurrentAnswers() {
+  const phase = PHASES[currentPhase];
+  phase.questions.forEach(q => {
+    const el = document.getElementById('ans_' + q.key);
+    if (el) allAnswers[q.key] = el.value;
+  });
+}
+
+function nextPhase() {
+  saveCurrentAnswers();
+  if (currentPhase < PHASES.length - 1) {
+    loadPhase(currentPhase + 1);
+  } else {
+    submitDeepWork();
+  }
+  document.getElementById('btnNextPhase').textContent =
+    currentPhase >= PHASES.length - 1 ? 'Thesis үүсгэх ✓' : 'Дараах →';
+}
+
+async function submitDeepWork() {
+  clearInterval(timerInterval);
+  document.getElementById('progressFill').style.width = '100%';
+  const res = await fetch('/api/deep-work/save', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ ticker, answers: allAnswers }),
+  });
+  const data = await res.json();
+  document.getElementById('phaseView').classList.add('hidden');
+  document.getElementById('thesisView').classList.remove('hidden');
+  document.getElementById('thesisTicker').textContent = ticker;
+  document.getElementById('thesisBox').textContent = data.thesis;
+}
+
+function restartDW() {
+  currentPhase = 0;
+  ticker = "";
+  allAnswers = {};
+  clearInterval(timerInterval);
+  document.getElementById('thesisView').classList.add('hidden');
+  document.getElementById('tickerView').classList.remove('hidden');
+  document.getElementById('tickerInput').value = '';
+  document.getElementById('progressFill').style.width = '0%';
+}
+</script>
+</body>
+</html>

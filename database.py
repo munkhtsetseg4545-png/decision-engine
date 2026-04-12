@@ -83,3 +83,49 @@ def get_ticker_sessions(ticker):
         s["answers"] = json.loads(s["answers"])
         sessions.append(s)
     return sessions
+
+
+def save_deep_work(ticker: str, answers: dict, thesis: str):
+    import json
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS deep_work_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            answers TEXT NOT NULL,
+            thesis TEXT NOT NULL
+        )
+    """)
+    conn.execute("""
+        INSERT INTO deep_work_sessions (ticker, created_at, answers, thesis)
+        VALUES (?, ?, ?, ?)
+    """, (
+        ticker.upper().strip(),
+        __import__('datetime').datetime.now().strftime("%Y-%m-%d %H:%M"),
+        json.dumps(answers, ensure_ascii=False),
+        thesis,
+    ))
+    conn.commit()
+    conn.close()
+
+
+def get_deep_work_sessions(ticker: str = ""):
+    import json
+    conn = get_db()
+    if ticker:
+        rows = conn.execute(
+            "SELECT * FROM deep_work_sessions WHERE ticker=? ORDER BY created_at DESC",
+            (ticker.upper().strip(),)
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT * FROM deep_work_sessions ORDER BY created_at DESC"
+        ).fetchall()
+    conn.close()
+    sessions = []
+    for row in rows:
+        s = dict(row)
+        s["answers"] = json.loads(s["answers"])
+        sessions.append(s)
+    return sessions

@@ -771,3 +771,135 @@ body {
   font-size: 13px;
   color: var(--ink-3);
 }
+
+/* ─── HOME GRID ──────────────────────────────────────────────── */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.home-card {
+  display: block;
+  text-decoration: none;
+  background: var(--white);
+  border: 1px solid var(--parchment-3);
+  border-top: 3px solid var(--gold);
+  padding: 1.75rem 2rem;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+.home-card:hover { box-shadow: var(--shadow-lg); border-top-color: var(--gold-light); }
+.home-card-muted { border-top-color: var(--ink-3); opacity: 0.6; pointer-events: none; }
+
+.home-card-layer {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.home-card-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.home-card-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+
+.home-card-desc {
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+.home-card-arrow {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2rem;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--gold);
+}
+
+.home-card-arrow.coming {
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+}
+
+/* ─── DEEP WORK ──────────────────────────────────────────────── */
+.phase-header { margin-bottom: 1.5rem; }
+
+.phase-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+
+.phase-timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.phase-timer-bar {
+  flex: 1;
+  height: 3px;
+  background: var(--parchment-3);
+}
+
+.phase-timer-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 1s linear;
+}
+
+.phase-timer-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gold);
+  min-width: 48px;
+}
+
+.dw-textarea {
+  width: 100%;
+  min-height: 100px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--parchment-2);
+  border: 1px solid var(--parchment-3);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+}
+
+.dw-textarea:focus { border-color: var(--gold-dim); }
+
+.thesis-box {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--ink-2);
+  background: var(--parchment-2);
+  border-left: 3px solid var(--gold);
+  padding: 1rem 1.25rem;
+  white-space: pre-wrap;
+}

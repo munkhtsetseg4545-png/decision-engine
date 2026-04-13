@@ -9,6 +9,18 @@ with app.app_context():
     init_db()
 
 
+def phases_to_dict():
+    return [
+        {
+            "key": p.key,
+            "title": p.title,
+            "duration_min": p.duration_min,
+            "questions": p.questions,
+        }
+        for p in PHASES
+    ]
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -16,7 +28,7 @@ def index():
 
 @app.route("/deep-work")
 def deep_work():
-    return render_template("deep_work.html", phases=PHASES)
+    return render_template("deep_work.html", phases=phases_to_dict())
 
 
 @app.route("/api/deep-work/save", methods=["POST"])

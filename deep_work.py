@@ -78,11 +78,11 @@ def build_thesis_text(ticker: str, answers: Dict[str, str]) -> str:
 def generate_ai_conclusion(ticker: str, answers: Dict[str, str]) -> str:
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
-        return "AI дүгнэлт: API key тохируулагдаагүй байна."
+        return "API key тохируулагдаагүй байна."
 
-    prompt = f"""Та мэргэжлийн хөрөнгө оруулалтын шинжээч. Доорх хөрөнгө оруулагчийн {ticker} хувьцааны судалгааг уншаад монгол хэлээр товч, мэргэжлийн дүгнэлт бич.
+    prompt = f"""Та Уоррен Баффет, Чарли Мунгер нарын investment philosophy-г гүнзгий судалсан мэргэжлийн хөрөнгө оруулалтын шинжээч. Доорх хөрөнгө оруулагчийн {ticker} хувьцааны судалгааг уншаад монгол хэлээр дэлгэрэнгүй, мэргэжлийн дүгнэлт бич.
 
-СУДАЛГАА:
+СУДАЛГААНЫ ХАРИУЛТУУД:
 Бизнес: {answers.get('what_do', '—')}
 Орлого: {answers.get('revenue', '—')}
 Бүтээгдэхүүн: {answers.get('product', '—')}
@@ -93,19 +93,30 @@ Competitive advantage: {answers.get('moat', '—')}
 Worst case: {answers.get('downside', '—')}
 Үнэлгээ: {answers.get('valuation', '—')}
 
-Дараах бүтцээр дүгнэлт бич (монголоор, 150-200 үг):
-1. Бизнесийн чанар (1-2 өгүүлбэр)
-2. Гол давуу болон сул тал (2-3 өгүүлбэр)
-3. Эрсдэлийн үнэлгээ (1-2 өгүүлбэр)
-4. Нийт дүгнэлт: энэ хувьцаа цааш судлах үнэ цэнэтэй эсэх (1 өгүүлбэр)
+Дараах бүтцээр дэлгэрэнгүй дүгнэлт бич. Markdown тэмдэгт (#, **, *) огт бүү ашигла. Зөвхөн энгийн текст бич:
 
-Зөвхөн дүгнэлтийн текст бичнэ, бусад тайлбар хэрэггүй."""
+1. БИЗНЕСИЙН ЧАНАР
+Бизнесийн загвар, тогтвортой байдал, ойлгомжтой байдлын талаар 3-4 өгүүлбэрээр тайлбарла.
+
+2. ӨРСӨЛДӨХ ДАВУУ ТАЛ
+Moat хэр хүчтэй вэ, удаан хугацаанд хадгалагдах уу, удирдлага итгэмжтэй юу — 3-4 өгүүлбэр.
+
+3. ӨСӨЛТИЙН БОЛОМЖ
+Ирээдүйн өсөлтийн хүчин зүйлүүд, зах зээлийн байр суурь — 3-4 өгүүлбэр.
+
+4. ЭРСДЭЛИЙН ҮНЭЛГЭЭ
+Гол эрсдэлүүд хэр ноцтой вэ, worst case хэр магадлалтай вэ — 3-4 өгүүлбэр.
+
+5. НИЙТ ДҮГНЭЛТ
+Энэ хувьцаа цааш судлах үнэ цэнэтэй эсэх, юуг анхаарах хэрэгтэй вэ — 2-3 өгүүлбэр.
+
+Дүгнэлт нь практик, тодорхой, хөрөнгө оруулагчид шууд хэрэгтэй мэдээлэл агуулсан байх ёстой."""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=500,
+            max_tokens=1500,
             messages=[{"role": "user", "content": prompt}]
         )
         return message.content[0].text
@@ -116,4 +127,4 @@ Worst case: {answers.get('downside', '—')}
 def generate_thesis(ticker: str, answers: Dict[str, str]) -> str:
     thesis = build_thesis_text(ticker, answers)
     conclusion = generate_ai_conclusion(ticker, answers)
-    return thesis + "\n\nАI ДҮГНЭЛТ\n" + conclusion
+    return thesis + "\n\nAI ДҮГНЭЛТ\n\n" + conclusion

@@ -181,6 +181,15 @@ function skipTimer() {
   updateTimerDisplay();
 }
 
+function saveAllAnswers() {
+  PHASES.forEach(phase => {
+    phase.questions.forEach(q => {
+      const el = document.getElementById('ans_' + q.key);
+      if (el) allAnswers[q.key] = el.value;
+    });
+  });
+}
+
 function saveCurrentAnswers() {
   PHASES[currentPhase].questions.forEach(q => {
     const el = document.getElementById('ans_' + q.key);
@@ -198,6 +207,7 @@ function nextPhase() {
 }
 
 async function submitDeepWork() {
+  saveCurrentAnswers();
   clearInterval(timerInterval);
   clearInterval(elapsedInterval);
   document.getElementById('progressFill').style.width = '100%';

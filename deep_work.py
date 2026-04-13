@@ -66,11 +66,10 @@ def build_thesis_text(ticker: str, answers: Dict[str, str]) -> str:
     ]
     for section_title, keys in sections:
         lines.append(section_title)
-        for key in keys:
+        for i, key in enumerate(keys, 1):
             label = PHASE_LABELS.get(key, key)
             answer = answers.get(key, "—").strip() or "—"
-            lines.append(f"• {label}:")
-            lines.append(f"  {answer}")
+            lines.append(f"{i}. {label}: {answer}")
         lines.append("")
     return "\n".join(lines).strip()
 
@@ -80,48 +79,32 @@ def generate_ai_conclusion(ticker: str, answers: Dict[str, str]) -> str:
     if not api_key:
         return "API key тохируулагдаагүй байна."
 
-    prompt = f"""Та Уоррен Баффет, Чарли Мунгер нарын investment philosophy-г гүнзгий судалсан мэргэжлийн хөрөнгө оруулалтын шинжээч. Доорх хөрөнгө оруулагчийн {ticker} хувьцааны судалгааг уншаад монгол хэлээр дэлгэрэнгүй, мэргэжлийн дүгнэлт бич.
-
-СУДАЛГААНЫ ХАРИУЛТУУД:
+    prompt = f"""{ticker} хувьцааны судалгаа:
 Бизнес: {answers.get('what_do', '—')}
 Орлого: {answers.get('revenue', '—')}
-Бүтээгдэхүүн: {answers.get('product', '—')}
-Competitive advantage: {answers.get('moat', '—')}
+Moat: {answers.get('moat', '—')}
 Удирдлага: {answers.get('management', '—')}
 Өсөлт: {answers.get('growth', '—')}
 Эрсдэл: {answers.get('risks', '—')}
 Worst case: {answers.get('downside', '—')}
 Үнэлгээ: {answers.get('valuation', '—')}
 
-Дараах бүтцээр дэлгэрэнгүй дүгнэлт бич. Markdown тэмдэгт (#, **, *) огт бүү ашигла. Зөвхөн энгийн текст бич:
-
-1. БИЗНЕСИЙН ЧАНАР
-Бизнесийн загвар, тогтвортой байдал, ойлгомжтой байдлын талаар 3-4 өгүүлбэрээр тайлбарла.
-
-2. ӨРСӨЛДӨХ ДАВУУ ТАЛ
-Moat хэр хүчтэй вэ, удаан хугацаанд хадгалагдах уу, удирдлага итгэмжтэй юу — 3-4 өгүүлбэр.
-
-3. ӨСӨЛТИЙН БОЛОМЖ
-Ирээдүйн өсөлтийн хүчин зүйлүүд, зах зээлийн байр суурь — 3-4 өгүүлбэр.
-
-4. ЭРСДЭЛИЙН ҮНЭЛГЭЭ
-Гол эрсдэлүүд хэр ноцтой вэ, worst case хэр магадлалтай вэ — 3-4 өгүүлбэр.
-
-5. НИЙТ ДҮГНЭЛТ
-Энэ хувьцаа цааш судлах үнэ цэнэтэй эсэх, юуг анхаарах хэрэгтэй вэ — 2-3 өгүүлбэр.
-
-Дүгнэлт нь практик, тодорхой, хөрөнгө оруулагчид шууд хэрэгтэй мэдээлэл агуулсан байх ёстой."""
+Монголоор товч дүгнэлт бич. Markdown (#, **, *) огт бүү ашигла. Дугаарласан 4 хэсэг:
+1. Давуу тал: (1-2 өгүүлбэр)
+2. Сул тал: (1-2 өгүүлбэр)
+3. Гол эрсдэл: (1 өгүүлбэр)
+4. Дүгнэлт: (1 өгүүлбэр)"""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=1500,
+            max_tokens=400,
             messages=[{"role": "user", "content": prompt}]
         )
         return message.content[0].text
     except Exception as e:
-        return f"AI дүгнэлт үүсгэхэд алдаа гарлаа: {str(e)}"
+        return f"Алдаа: {str(e)}"
 
 
 def generate_thesis(ticker: str, answers: Dict[str, str]) -> str:

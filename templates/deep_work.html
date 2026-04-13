@@ -128,7 +128,7 @@ function renderPhase(idx) {
     html += `
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">${i+1}. ${q.text}</p>
-        <textarea id="ta_${q.key}" class="dw-textarea" placeholder="• Энд бичнэ...">${saved}</textarea>
+        <textarea id="ta_${q.key}" class="dw-textarea" placeholder="• Энд бичнэ..." oninput="answers['${q.key}'] = this.value">${saved}</textarea>
       </div>`;
   });
   document.getElementById('questionsWrap').innerHTML = html;

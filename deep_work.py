@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List
-
+import os
+import anthropic
 
 @dataclass
 class Phase:
@@ -43,26 +44,76 @@ PHASES: List[Phase] = [
     ),
 ]
 
+PHASE_LABELS = {
+    "what_do":    "Бизнес юу хийдэг вэ?",
+    "revenue":    "Хэрхэн мөнгө олдог вэ?",
+    "product":    "Үндсэн бүтээгдэхүүн",
+    "moat":       "Competitive advantage",
+    "management": "Удирдлага",
+    "growth":     "Өсөлт",
+    "risks":      "Хамгийн том эрсдэлүүд",
+    "downside":   "Worst case",
+    "valuation":  "Үнэлгээ",
+}
+
+
+def build_thesis_text(ticker: str, answers: Dict[str, str]) -> str:
+    lines = [f"INVESTMENT THESIS — {ticker.upper()}", ""]
+    sections = [
+        ("BUSINESS", ["what_do", "revenue", "product"]),
+        ("MOAT & MANAGEMENT", ["moat", "management", "growth"]),
+        ("RISK & VALUATION", ["risks", "downside", "valuation"]),
+    ]
+    for section_title, keys in sections:
+        lines.append(section_title)
+        for key in keys:
+            label = PHASE_LABELS.get(key, key)
+            answer = answers.get(key, "—").strip() or "—"
+            lines.append(f"• {label}:")
+            lines.append(f"  {answer}")
+        lines.append("")
+    return "\n".join(lines).strip()
+
+
+def generate_ai_conclusion(ticker: str, answers: Dict[str, str]) -> str:
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    if not api_key:
+        return "AI дүгнэлт: API key тохируулагдаагүй байна."
+
+    prompt = f"""Та мэргэжлийн хөрөнгө оруулалтын шинжээч. Доорх хөрөнгө оруулагчийн {ticker} хувьцааны судалгааг уншаад монгол хэлээр товч, мэргэжлийн дүгнэлт бич.
+
+СУДАЛГАА:
+Бизнес: {answers.get('what_do', '—')}
+Орлого: {answers.get('revenue', '—')}
+Бүтээгдэхүүн: {answers.get('product', '—')}
+Competitive advantage: {answers.get('moat', '—')}
+Удирдлага: {answers.get('management', '—')}
+Өсөлт: {answers.get('growth', '—')}
+Эрсдэл: {answers.get('risks', '—')}
+Worst case: {answers.get('downside', '—')}
+Үнэлгээ: {answers.get('valuation', '—')}
+
+Дараах бүтцээр дүгнэлт бич (монголоор, 150-200 үг):
+1. Бизнесийн чанар (1-2 өгүүлбэр)
+2. Гол давуу болон сул тал (2-3 өгүүлбэр)
+3. Эрсдэлийн үнэлгээ (1-2 өгүүлбэр)
+4. Нийт дүгнэлт: энэ хувьцаа цааш судлах үнэ цэнэтэй эсэх (1 өгүүлбэр)
+
+Зөвхөн дүгнэлтийн текст бичнэ, бусад тайлбар хэрэггүй."""
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=500,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return message.content[0].text
+    except Exception as e:
+        return f"AI дүгнэлт үүсгэхэд алдаа гарлаа: {str(e)}"
+
 
 def generate_thesis(ticker: str, answers: Dict[str, str]) -> str:
-    business = answers.get("what_do", "—")
-    revenue = answers.get("revenue", "—")
-    moat = answers.get("moat", "—")
-    management = answers.get("management", "—")
-    risks = answers.get("risks", "—")
-    valuation = answers.get("valuation", "—")
-
-    quality_signal = "өндөр чанартай" if any(
-        w in str(moat).lower() for w in ["байна", "тийм", "хүчтэй", "strong", "yes"]
-    ) else "дунд зэргийн"
-
-    return (
-        f"INVESTMENT THESIS — {ticker.upper()}\n\n"
-        f"1. Бизнес: {business}\n"
-        f"2. Орлого: {revenue}\n"
-        f"3. Давуу тал: {moat}\n"
-        f"4. Удирдлага: {management}\n"
-        f"5. Эрсдэл: {risks}\n"
-        f"6. Үнэлгээ: {valuation}\n\n"
-        f"Дүгнэлт: Энэ бол {quality_signal} бизнес бөгөөд тодорхой эрсдэлтэй."
-    )
+    thesis = build_thesis_text(ticker, answers)
+    conclusion = generate_ai_conclusion(ticker, answers)
+    return thesis + "\n\nАI ДҮГНЭЛТ\n" + conclusion

@@ -69,7 +69,8 @@ def build_thesis_text(ticker: str, answers: Dict[str, str]) -> str:
         for i, key in enumerate(keys, 1):
             label = PHASE_LABELS.get(key, key)
             answer = answers.get(key, "—").strip() or "—"
-            lines.append(f"{i}. {label}: {answer}")
+            lines.append(f"{i}. {label}")
+        lines.append(f"   {answer}")
         lines.append("")
     return "\n".join(lines).strip()
 

@@ -42,7 +42,6 @@
   <!-- PHASES -->
   <main class="main hidden" id="phaseView">
     <div class="quiz-shell" style="max-width:680px;">
-
       <div class="phase-header">
         <div class="q-counter">
           Phase <span id="phaseNum">1</span><span class="q-total"> / 3</span>
@@ -95,6 +94,8 @@ let ticker = "";
 let allAnswers = {};
 let timerInterval = null;
 let secondsLeft = 0;
+let elapsedSec = 0;
+let elapsedInterval = null;
 
 function startDeepWork() {
   const input = document.getElementById('tickerInput').value.trim().toUpperCase();
@@ -103,6 +104,7 @@ function startDeepWork() {
   document.getElementById('tickerView').classList.add('hidden');
   document.getElementById('phaseView').classList.remove('hidden');
   document.getElementById('phaseTicker').textContent = ticker;
+  elapsedInterval = setInterval(() => { elapsedSec++; }, 1000);
   loadPhase(0);
 }
 
@@ -119,14 +121,36 @@ function loadPhase(idx) {
   document.getElementById('progressFill').style.width = ((idx) / 3 * 100) + '%';
 
   let html = '';
-  phase.questions.forEach(q => {
+  phase.questions.forEach((q, i) => {
     const saved = allAnswers[q.key] || '';
     html += `<div class="q-card" style="margin-bottom:1rem;">
-      <p class="q-text" style="font-size:17px;margin-bottom:1rem;">${q.text}</p>
-      <textarea id="ans_${q.key}" class="dw-textarea" placeholder="Энд бичнэ...">${saved}</textarea>
+      <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">${i+1}. ${q.text}</p>
+      <textarea id="ans_${q.key}" class="dw-textarea" placeholder="• Энд бичнэ...">${saved}</textarea>
     </div>`;
   });
   document.getElementById('questionsWrap').innerHTML = html;
+
+  // Auto bullet on Enter
+  phase.questions.forEach(q => {
+    const ta = document.getElementById('ans_' + q.key);
+    if (!ta) return;
+    ta.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const val = this.value;
+        const insertion = '\n• ';
+        this.value = val.slice(0, start) + insertion + val.slice(start);
+        this.selectionStart = this.selectionEnd = start + insertion.length;
+      }
+    });
+    // Add bullet if empty on focus
+    ta.addEventListener('focus', function() {
+      if (this.value === '') this.value = '• ';
+    });
+  });
+
+  document.getElementById('btnNextPhase').textContent = idx === PHASES.length - 1 ? 'Thesis үүсгэх ✓' : 'Дараах →';
   startPhaseTimer(phase.duration_min);
 }
 
@@ -137,7 +161,7 @@ function startPhaseTimer(minutes) {
   timerInterval = setInterval(() => {
     secondsLeft--;
     updateTimerDisplay();
-    if (secondsLeft <= 0) { clearInterval(timerInterval); }
+    if (secondsLeft <= 0) clearInterval(timerInterval);
   }, 1000);
 }
 
@@ -148,8 +172,7 @@ function updateTimerDisplay() {
   document.getElementById('phaseTimer').textContent = label;
   document.getElementById('timerLabel').textContent = label;
   const total = PHASES[currentPhase].duration_min * 60;
-  const pct = (secondsLeft / total) * 100;
-  document.getElementById('timerFill').style.width = pct + '%';
+  document.getElementById('timerFill').style.width = (secondsLeft / total * 100) + '%';
 }
 
 function skipTimer() {
@@ -159,8 +182,7 @@ function skipTimer() {
 }
 
 function saveCurrentAnswers() {
-  const phase = PHASES[currentPhase];
-  phase.questions.forEach(q => {
+  PHASES[currentPhase].questions.forEach(q => {
     const el = document.getElementById('ans_' + q.key);
     if (el) allAnswers[q.key] = el.value;
   });
@@ -173,17 +195,19 @@ function nextPhase() {
   } else {
     submitDeepWork();
   }
-  document.getElementById('btnNextPhase').textContent =
-    currentPhase >= PHASES.length - 1 ? 'Thesis үүсгэх ✓' : 'Дараах →';
 }
 
 async function submitDeepWork() {
   clearInterval(timerInterval);
+  clearInterval(elapsedInterval);
   document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('btnNextPhase').textContent = 'Боловсруулж байна...';
+  document.getElementById('btnNextPhase').disabled = true;
+
   const res = await fetch('/api/deep-work/save', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ ticker, answers: allAnswers }),
+    body: JSON.stringify({ ticker, answers: allAnswers, elapsed_sec: elapsedSec }),
   });
   const data = await res.json();
   document.getElementById('phaseView').classList.add('hidden');
@@ -196,11 +220,14 @@ function restartDW() {
   currentPhase = 0;
   ticker = "";
   allAnswers = {};
+  elapsedSec = 0;
   clearInterval(timerInterval);
+  clearInterval(elapsedInterval);
   document.getElementById('thesisView').classList.add('hidden');
   document.getElementById('tickerView').classList.remove('hidden');
   document.getElementById('tickerInput').value = '';
   document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('phaseTimer').textContent = '20:00';
 }
 </script>
 </body>

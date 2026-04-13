@@ -15,6 +15,7 @@ let current = 0;
 let answers = {};
 let ticker = "";
 let timerInterval = null;
+let elapsedSec = 0;
 
 function startTimer() {
   const t0 = Date.now();
@@ -22,6 +23,7 @@ function startTimer() {
     const e = Math.floor((Date.now() - t0) / 1000);
     const m = String(Math.floor(e / 60)).padStart(2,'0');
     const s = String(e % 60).padStart(2,'0');
+    elapsedSec = e;
     document.getElementById('timer').textContent = m+':'+s;
   }, 1000);
 }
@@ -91,7 +93,7 @@ async function submitScores() {
   const res = await fetch('/score', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ answers: payload, ticker: ticker }),
+    body: JSON.stringify({ answers: payload, ticker: ticker, elapsed_sec: elapsedSec }),
   });
   showResult(await res.json());
 }

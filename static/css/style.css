@@ -921,3 +921,11 @@ body {
   background: var(--danger);
   color: var(--white);
 }
+
+/* ─── ELAPSED TIME ───────────────────────────────────────────── */
+.h-elapsed {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}

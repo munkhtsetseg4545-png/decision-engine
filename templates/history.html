@@ -45,7 +45,7 @@
         <div class="history-card" id="sc-{{ s.id }}">
           <div class="history-card-header">
             <span class="h-ticker-badge">{{ s.ticker }}</span>
-            <span class="h-date">{{ s.created_at }}</span>
+            <span class="h-date">{{ s.created_at }}{% if s.elapsed_fmt %} · <span class="h-elapsed">{{ s.elapsed_fmt }}</span>{% endif %}</span>
             <span class="h-score">{{ s.total_score }}/100</span>
             <span class="verdict-badge h-decision
               {% if 'STRONG' in s.decision %}badge-go
@@ -78,7 +78,7 @@
         <div class="history-card" id="dw-{{ s.id }}" style="border-left-color: var(--gold);">
           <div class="history-card-header">
             <span class="h-ticker-badge">{{ s.ticker }}</span>
-            <span class="h-date">{{ s.created_at }}</span>
+            <span class="h-date">{{ s.created_at }}{% if s.elapsed_fmt %} · <span class="h-elapsed">{{ s.elapsed_fmt }}</span>{% endif %}</span>
             <span class="verdict-badge badge-go" style="font-size:10px;padding:2px 8px;">Deep Work</span>
             <button class="delete-btn" onclick="deleteDeepWork({{ s.id }})">Устгах</button>
           </div>

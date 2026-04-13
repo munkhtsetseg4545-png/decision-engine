@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "scoring_history.db")
@@ -26,12 +27,20 @@ def init_db():
             answers TEXT NOT NULL
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS deep_work_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            answers TEXT NOT NULL,
+            thesis TEXT NOT NULL
+        )
+    """)
     conn.commit()
     conn.close()
 
 
 def save_session(ticker, result, answers):
-    import json
     conn = get_db()
     conn.execute("""
         INSERT INTO scoring_sessions
@@ -52,11 +61,8 @@ def save_session(ticker, result, answers):
 
 
 def get_all_sessions():
-    import json
     conn = get_db()
-    rows = conn.execute("""
-        SELECT * FROM scoring_sessions ORDER BY created_at DESC
-    """).fetchall()
+    rows = conn.execute("SELECT * FROM scoring_sessions ORDER BY created_at DESC").fetchall()
     conn.close()
     sessions = []
     for row in rows:
@@ -69,11 +75,11 @@ def get_all_sessions():
 
 
 def get_ticker_sessions(ticker):
-    import json
     conn = get_db()
-    rows = conn.execute("""
-        SELECT * FROM scoring_sessions WHERE ticker = ? ORDER BY created_at DESC
-    """, (ticker.upper().strip(),)).fetchall()
+    rows = conn.execute(
+        "SELECT * FROM scoring_sessions WHERE ticker=? ORDER BY created_at DESC",
+        (ticker.upper().strip(),)
+    ).fetchall()
     conn.close()
     sessions = []
     for row in rows:
@@ -85,24 +91,14 @@ def get_ticker_sessions(ticker):
     return sessions
 
 
-def save_deep_work(ticker: str, answers: dict, thesis: str):
-    import json
+def save_deep_work(ticker, answers, thesis):
     conn = get_db()
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS deep_work_sessions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            ticker TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            answers TEXT NOT NULL,
-            thesis TEXT NOT NULL
-        )
-    """)
     conn.execute("""
         INSERT INTO deep_work_sessions (ticker, created_at, answers, thesis)
         VALUES (?, ?, ?, ?)
     """, (
         ticker.upper().strip(),
-        __import__('datetime').datetime.now().strftime("%Y-%m-%d %H:%M"),
+        datetime.now().strftime("%Y-%m-%d %H:%M"),
         json.dumps(answers, ensure_ascii=False),
         thesis,
     ))
@@ -110,8 +106,7 @@ def save_deep_work(ticker: str, answers: dict, thesis: str):
     conn.close()
 
 
-def get_deep_work_sessions(ticker: str = ""):
-    import json
+def get_deep_work_sessions(ticker=""):
     conn = get_db()
     if ticker:
         rows = conn.execute(

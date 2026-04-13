@@ -42,7 +42,7 @@
           {% if ticker %}<span class="h-ticker">{{ ticker }}</span>{% endif %}
         </div>
         {% for s in scoring_sessions %}
-        <div class="history-card">
+        <div class="history-card" id="sc-{{ s.id }}">
           <div class="history-card-header">
             <span class="h-ticker-badge">{{ s.ticker }}</span>
             <span class="h-date">{{ s.created_at }}</span>
@@ -52,6 +52,7 @@
               {% elif 'SMALL' in s.decision or 'WATCHLIST' in s.decision %}badge-watch
               {% elif 'HOLD' in s.decision %}badge-hold
               {% else %}badge-nogo{% endif %}">{{ s.decision }}</span>
+            <button class="delete-btn" onclick="deleteScoring({{ s.id }})">Устгах</button>
           </div>
           <p class="h-interp">{{ s.interpretation }}</p>
           {% if s.red_flags %}
@@ -74,11 +75,12 @@
       <h3 class="section-heading" style="margin-top:2rem;margin-bottom:0.75rem;">Deep Work sessions</h3>
       {% if dw_sessions %}
         {% for s in dw_sessions %}
-        <div class="history-card" style="border-left-color: var(--gold);">
+        <div class="history-card" id="dw-{{ s.id }}" style="border-left-color: var(--gold);">
           <div class="history-card-header">
             <span class="h-ticker-badge">{{ s.ticker }}</span>
             <span class="h-date">{{ s.created_at }}</span>
             <span class="verdict-badge badge-go" style="font-size:10px;padding:2px 8px;">Deep Work</span>
+            <button class="delete-btn" onclick="deleteDeepWork({{ s.id }})">Устгах</button>
           </div>
           <div class="thesis-box" style="margin-top:0.75rem;font-size:11px;">{{ s.thesis }}</div>
         </div>
@@ -95,5 +97,23 @@
     </div>
   </main>
 </div>
+
+<script>
+async function deleteScoring(id) {
+  if (!confirm('Энэ scoring-г устгах уу?')) return;
+  const res = await fetch('/delete/scoring/' + id, { method: 'POST' });
+  if ((await res.json()).ok) {
+    document.getElementById('sc-' + id).remove();
+  }
+}
+
+async function deleteDeepWork(id) {
+  if (!confirm('Энэ Deep Work session-г устгах уу?')) return;
+  const res = await fetch('/delete/deepwork/' + id, { method: 'POST' });
+  if ((await res.json()).ok) {
+    document.getElementById('dw-' + id).remove();
+  }
+}
+</script>
 </body>
 </html>

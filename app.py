@@ -58,3 +58,23 @@ def history():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+@app.route("/delete/scoring/<int:session_id>", methods=["POST"])
+def delete_scoring(session_id):
+    from database import get_db
+    conn = get_db()
+    conn.execute("DELETE FROM scoring_sessions WHERE id=?", (session_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/delete/deepwork/<int:session_id>", methods=["POST"])
+def delete_deepwork(session_id):
+    from database import get_db
+    conn = get_db()
+    conn.execute("DELETE FROM deep_work_sessions WHERE id=?", (session_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})

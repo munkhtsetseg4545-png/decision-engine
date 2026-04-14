@@ -52,15 +52,15 @@
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">1. Энэ компани юу хийдэг вэ? Үндсэн бизнес нь юу вэ?</p>
-        <textarea id="ans_what_do" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_what_do" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">2. Хэрхэн мөнгө олдог вэ? Орлогын эх үүсвэр нь юу вэ?</p>
-        <textarea id="ans_revenue" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_revenue" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">3. Үндсэн бүтээгдэхүүн/үйлчилгээ нь юу вэ?</p>
-        <textarea id="ans_product" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_product" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="nav-row" style="margin-top:1.5rem;">
         <button class="btn btn-ghost" onclick="skipTimer()">Timer алгасах</button>
@@ -82,15 +82,15 @@
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">1. Өрсөлдөгчдөөс ялгарах competitive advantage (moat) байгаа юу?</p>
-        <textarea id="ans_moat" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_moat" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">2. Удирдлага хүчтэй юу? Shareholder-д ээлтэй юу?</p>
-        <textarea id="ans_management" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_management" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">3. Өсөлт тогтвортой юу? Ирээдүйд өсөх боломж байна уу?</p>
-        <textarea id="ans_growth" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_growth" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="nav-row" style="margin-top:1.5rem;">
         <button class="btn btn-ghost" onclick="skipTimer()">Timer алгасах</button>
@@ -112,15 +112,15 @@
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">1. Хамгийн том эрсдэлүүд юу вэ?</p>
-        <textarea id="ans_risks" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_risks" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">2. Юу буруу болж болох вэ? Worst case юу вэ?</p>
-        <textarea id="ans_downside" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_downside" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="q-card" style="margin-bottom:1rem;">
         <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">3. Хувьцаа хямд уу, үнэтэй юу? Яагаад?</p>
-        <textarea id="ans_valuation" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+        <textarea id="ans_valuation" class="dw-textarea" placeholder="Энд бичнэ..."></textarea>
       </div>
       <div class="nav-row" style="margin-top:1.5rem;">
         <button class="btn btn-ghost" onclick="skipTimer()">Timer алгасах</button>
@@ -159,18 +159,17 @@ let elapsedInterval = null;
 let currentPhaseIdx = 0;
 let secondsLeft = 1200;
 
-const KEYS = ['what_do','revenue','product','moat','management','growth','risks','downside','valuation'];
-
 function startDeepWork() {
   const val = document.getElementById('tickerInput').value.trim().toUpperCase();
   if (!val) { document.getElementById('tickerInput').focus(); return; }
   ticker = val;
-  ['ticker0','ticker1','ticker2'].forEach(id => document.getElementById(id).textContent = ticker);
+  document.getElementById('ticker0').textContent = ticker;
+  document.getElementById('ticker1').textContent = ticker;
+  document.getElementById('ticker2').textContent = ticker;
   document.getElementById('tickerView').classList.add('hidden');
   document.getElementById('phase0View').classList.remove('hidden');
   elapsedInterval = setInterval(() => elapsedSec++, 1000);
   startTimer(0);
-  addBullets();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -178,30 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') startDeepWork(); });
 });
 
-function addBullets() {
-  KEYS.forEach(key => {
-    const ta = document.getElementById('ans_' + key);
-    if (!ta) return;
-    if (!ta.value) ta.value = '• ';
-    ta.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const pos = this.selectionStart;
-        const ins = '\n• ';
-        this.value = this.value.slice(0, pos) + ins + this.value.slice(pos);
-        this.selectionStart = this.selectionEnd = pos + ins.length;
-      }
-    });
-  });
-}
-
 function goPhase(idx) {
   document.getElementById('phase' + (idx-1) + 'View').classList.add('hidden');
   document.getElementById('phase' + idx + 'View').classList.remove('hidden');
   document.getElementById('progressFill').style.width = (idx / 3 * 100) + '%';
   currentPhaseIdx = idx;
   startTimer(idx);
-  addBullets();
 }
 
 function startTimer(idx) {
@@ -236,14 +217,21 @@ async function submitAll() {
   clearInterval(timerInterval);
   clearInterval(elapsedInterval);
   document.getElementById('progressFill').style.width = '100%';
-  document.getElementById('btnSubmit').textContent = 'Боловсруулж байна...';
-  document.getElementById('btnSubmit').disabled = true;
+  const btn = document.getElementById('btnSubmit');
+  btn.textContent = 'Боловсруулж байна...';
+  btn.disabled = true;
 
-  const answers = {};
-  KEYS.forEach(key => {
-    const ta = document.getElementById('ans_' + key);
-    answers[key] = ta ? ta.value : '';
-  });
+  const answers = {
+    what_do:    document.getElementById('ans_what_do').value,
+    revenue:    document.getElementById('ans_revenue').value,
+    product:    document.getElementById('ans_product').value,
+    moat:       document.getElementById('ans_moat').value,
+    management: document.getElementById('ans_management').value,
+    growth:     document.getElementById('ans_growth').value,
+    risks:      document.getElementById('ans_risks').value,
+    downside:   document.getElementById('ans_downside').value,
+    valuation:  document.getElementById('ans_valuation').value,
+  };
 
   const res = await fetch('/api/deep-work/save', {
     method: 'POST',
@@ -263,9 +251,10 @@ function restartDW() {
   elapsedSec = 0;
   clearInterval(timerInterval);
   clearInterval(elapsedInterval);
-  KEYS.forEach(key => {
-    const ta = document.getElementById('ans_' + key);
-    if (ta) ta.value = '';
+  ['ans_what_do','ans_revenue','ans_product','ans_moat','ans_management',
+   'ans_growth','ans_risks','ans_downside','ans_valuation'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
   });
   ['phase0View','phase1View','phase2View','thesisView'].forEach(id => {
     document.getElementById(id).classList.add('hidden');

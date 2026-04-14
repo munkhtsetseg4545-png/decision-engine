@@ -3,6 +3,7 @@ from typing import Dict, List
 import os
 import anthropic
 
+
 @dataclass
 class Phase:
     key: str
@@ -12,48 +13,27 @@ class Phase:
 
 
 PHASES: List[Phase] = [
-    Phase(
-        key="business",
-        title="Business — Бизнесийг ойлгох",
-        duration_min=20,
-        questions=[
-            {"key": "what_do", "text": "Энэ компани юу хийдэг вэ? Үндсэн бизнес нь юу вэ?"},
-            {"key": "revenue",  "text": "Хэрхэн мөнгө олдог вэ? Орлогын эх үүсвэр нь юу вэ?"},
-            {"key": "product",  "text": "Үндсэн бүтээгдэхүүн/үйлчилгээ нь юу вэ?"},
-        ],
-    ),
-    Phase(
-        key="moat",
-        title="Moat & Management — Давуу тал ба Удирдлага",
-        duration_min=20,
-        questions=[
-            {"key": "moat",       "text": "Өрсөлдөгчдөөс ялгарах competitive advantage (moat) байгаа юу?"},
-            {"key": "management", "text": "Удирдлага хүчтэй юу? Shareholder-д ээлтэй юу?"},
-            {"key": "growth",     "text": "Өсөлт тогтвортой юу? Ирээдүйд өсөх боломж байна уу?"},
-        ],
-    ),
-    Phase(
-        key="risk",
-        title="Risk & Valuation — Эрсдэл ба Үнэлгээ",
-        duration_min=20,
-        questions=[
-            {"key": "risks",     "text": "Хамгийн том эрсдэлүүд юу вэ?"},
-            {"key": "downside",  "text": "Юу буруу болж болох вэ? Worst case юу вэ?"},
-            {"key": "valuation", "text": "Хувьцаа хямд уу, үнэтэй юу? Яагаад?"},
-        ],
-    ),
+    Phase(key="business", title="Business — Бизнесийг ойлгох", duration_min=20, questions=[
+        {"key": "what_do",  "text": "Энэ компани юу хийдэг вэ? Үндсэн бизнес нь юу вэ?"},
+        {"key": "revenue",  "text": "Хэрхэн мөнгө олдог вэ? Орлогын эх үүсвэр нь юу вэ?"},
+        {"key": "product",  "text": "Үндсэн бүтээгдэхүүн/үйлчилгээ нь юу вэ?"},
+    ]),
+    Phase(key="moat", title="Moat & Management — Давуу тал ба Удирдлага", duration_min=20, questions=[
+        {"key": "moat",       "text": "Өрсөлдөгчдөөс ялгарах competitive advantage байгаа юу?"},
+        {"key": "management", "text": "Удирдлага хүчтэй юу? Shareholder-д ээлтэй юу?"},
+        {"key": "growth",     "text": "Өсөлт тогтвортой юу? Ирээдүйд өсөх боломж байна уу?"},
+    ]),
+    Phase(key="risk", title="Risk & Valuation — Эрсдэл ба Үнэлгээ", duration_min=20, questions=[
+        {"key": "risks",     "text": "Хамгийн том эрсдэлүүд юу вэ?"},
+        {"key": "downside",  "text": "Юу буруу болж болох вэ? Worst case юу вэ?"},
+        {"key": "valuation", "text": "Хувьцаа хямд уу, үнэтэй юу? Яагаад?"},
+    ]),
 ]
 
 PHASE_LABELS = {
-    "what_do":    "Бизнес юу хийдэг вэ?",
-    "revenue":    "Хэрхэн мөнгө олдог вэ?",
-    "product":    "Үндсэн бүтээгдэхүүн",
-    "moat":       "Competitive advantage",
-    "management": "Удирдлага",
-    "growth":     "Өсөлт",
-    "risks":      "Хамгийн том эрсдэлүүд",
-    "downside":   "Worst case",
-    "valuation":  "Үнэлгээ",
+    "what_do": "Бизнес", "revenue": "Орлого", "product": "Бүтээгдэхүүн",
+    "moat": "Competitive advantage", "management": "Удирдлага", "growth": "Өсөлт",
+    "risks": "Эрсдэл", "downside": "Worst case", "valuation": "Үнэлгээ",
 }
 
 
@@ -64,13 +44,12 @@ def build_thesis_text(ticker: str, answers: Dict[str, str]) -> str:
         ("MOAT & MANAGEMENT", ["moat", "management", "growth"]),
         ("RISK & VALUATION", ["risks", "downside", "valuation"]),
     ]
-    for section_title, keys in sections:
-        lines.append(section_title)
+    for title, keys in sections:
+        lines.append(title)
         for i, key in enumerate(keys, 1):
-            label = PHASE_LABELS.get(key, key)
-            answer = answers.get(key, "—").strip() or "—"
-            lines.append(f"{i}. {label}")
-        lines.append(f"   {answer}")
+            ans = answers.get(key, "").strip() or "—"
+            lines.append(f"{i}. {PHASE_LABELS[key]}")
+            lines.append(f"   {ans}")
         lines.append("")
     return "\n".join(lines).strip()
 
@@ -78,32 +57,28 @@ def build_thesis_text(ticker: str, answers: Dict[str, str]) -> str:
 def generate_ai_conclusion(ticker: str, answers: Dict[str, str]) -> str:
     api_key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not api_key:
-        return "API key тохируулагдаагүй байна."
+        return "API key тохируулагдаагүй."
 
-    prompt = f"""{ticker} хувьцааны судалгаа:
-Бизнес: {answers.get('what_do', '—')}
-Орлого: {answers.get('revenue', '—')}
-Moat: {answers.get('moat', '—')}
-Удирдлага: {answers.get('management', '—')}
-Өсөлт: {answers.get('growth', '—')}
-Эрсдэл: {answers.get('risks', '—')}
-Worst case: {answers.get('downside', '—')}
-Үнэлгээ: {answers.get('valuation', '—')}
+    a = answers
+    prompt = f"""{ticker} судалгаа:
+Бизнес: {a.get('what_do','')} | Орлого: {a.get('revenue','')} | Moat: {a.get('moat','')}
+Удирдлага: {a.get('management','')} | Өсөлт: {a.get('growth','')}
+Эрсдэл: {a.get('risks','')} | Worst case: {a.get('downside','')} | Үнэлгээ: {a.get('valuation','')}
 
-Монголоор товч дүгнэлт бич. Markdown (#, **, *) огт бүү ашигла. Дугаарласан 4 хэсэг:
-1. Давуу тал: (1-2 өгүүлбэр)
-2. Сул тал: (1-2 өгүүлбэр)
-3. Гол эрсдэл: (1 өгүүлбэр)
-4. Дүгнэлт: (1 өгүүлбэр)"""
+Монголоор 4 мөр дүгнэлт бич. Markdown бүү ашигла:
+1. Давуу тал:
+2. Сул тал:
+3. Гол эрсдэл:
+4. Дүгнэлт:"""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
+        msg = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=400,
+            max_tokens=300,
             messages=[{"role": "user", "content": prompt}]
         )
-        return message.content[0].text
+        return msg.content[0].text
     except Exception as e:
         return f"Алдаа: {str(e)}"
 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-mark">DE</div>
+      <div class="header-title">
+        <span class="header-layer">Settings</span>
+        <span class="header-name">Тохиргоо</span>
+      </div>
+      <div class="header-right">
+        <a href="/" class="history-link">← Нүүр</a>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  </header>
+
+  <main class="main">
+    <div class="quiz-shell" style="max-width:560px;">
+      <div class="q-card">
+        <div class="q-meta-row" style="margin-bottom:1.5rem;">
+          <span class="q-cat">Portfolio тохиргоо</span>
+        </div>
+
+        <div style="margin-bottom:1.25rem;">
+          <label class="settings-label">Нэр</label>
+          <input type="text" id="s_name" class="settings-input" value="{{ settings.name }}" placeholder="Таны нэр">
+        </div>
+
+        <div style="margin-bottom:1.25rem;">
+          <label class="settings-label">Нийт хөрөнгө (USD)</label>
+          <input type="number" id="s_capital" class="settings-input" value="{{ settings.capital }}" placeholder="10000" min="0">
+        </div>
+
+        <div style="margin-bottom:1.25rem;">
+          <label class="settings-label">Нэг хувьцаанд хамгийн их хувь (%)</label>
+          <input type="number" id="s_max_position" class="settings-input" value="{{ settings.max_position }}" placeholder="10" min="1" max="100">
+        </div>
+
+        <div style="margin-bottom:1.75rem;">
+          <label class="settings-label">Risk tolerance</label>
+          <div class="risk-options">
+            <label class="risk-option {% if settings.risk_tolerance == 'conservative' %}risk-active{% endif %}">
+              <input type="radio" name="risk" value="conservative" {% if settings.risk_tolerance == 'conservative' %}checked{% endif %}> Conservative
+            </label>
+            <label class="risk-option {% if settings.risk_tolerance == 'moderate' %}risk-active{% endif %}">
+              <input type="radio" name="risk" value="moderate" {% if settings.risk_tolerance == 'moderate' %}checked{% endif %}> Moderate
+            </label>
+            <label class="risk-option {% if settings.risk_tolerance == 'aggressive' %}risk-active{% endif %}">
+              <input type="radio" name="risk" value="aggressive" {% if settings.risk_tolerance == 'aggressive' %}checked{% endif %}> Aggressive
+            </label>
+          </div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn btn-primary" onclick="saveSettings()">Хадгалах</button>
+        </div>
+
+        <div id="saveMsg" style="display:none;margin-top:1rem;font-family:var(--font-mono);font-size:12px;color:var(--safe);">
+          Хадгалагдлаа ✓
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+async function saveSettings() {
+  const form = new FormData();
+  form.append('name', document.getElementById('s_name').value);
+  form.append('capital', document.getElementById('s_capital').value);
+  form.append('max_position', document.getElementById('s_max_position').value);
+  form.append('risk_tolerance', document.querySelector('input[name="risk"]:checked').value);
+
+  const res = await fetch('/settings', { method: 'POST', body: form });
+  const data = await res.json();
+  if (data.ok) {
+    const msg = document.getElementById('saveMsg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2000);
+  }
+}
+</script>
+</body>
+</html>

@@ -149,3 +149,46 @@ def get_deep_work_sessions(ticker=""):
         s["elapsed_fmt"] = format_elapsed(s.get("elapsed_sec", 0))
         sessions.append(s)
     return sessions
+
+
+def save_settings(settings: dict):
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            id INTEGER PRIMARY KEY,
+            name TEXT DEFAULT '',
+            capital REAL DEFAULT 0,
+            max_position REAL DEFAULT 10,
+            risk_tolerance TEXT DEFAULT 'moderate'
+        )
+    """)
+    conn.execute("DELETE FROM settings")
+    conn.execute("""
+        INSERT INTO settings (id, name, capital, max_position, risk_tolerance)
+        VALUES (1, ?, ?, ?, ?)
+    """, (
+        settings.get("name", ""),
+        float(settings.get("capital", 0)),
+        float(settings.get("max_position", 10)),
+        settings.get("risk_tolerance", "moderate"),
+    ))
+    conn.commit()
+    conn.close()
+
+
+def get_settings() -> dict:
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            id INTEGER PRIMARY KEY,
+            name TEXT DEFAULT '',
+            capital REAL DEFAULT 0,
+            max_position REAL DEFAULT 10,
+            risk_tolerance TEXT DEFAULT 'moderate'
+        )
+    """)
+    row = conn.execute("SELECT * FROM settings WHERE id=1").fetchone()
+    conn.close()
+    if row:
+        return dict(row)
+    return {"name": "", "capital": 0, "max_position": 10, "risk_tolerance": "moderate"}

@@ -929,3 +929,50 @@ body {
   color: var(--gold);
   letter-spacing: 0.06em;
 }
+
+/* ─── SETTINGS ───────────────────────────────────────────────── */
+.settings-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.settings-input {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--ink);
+  border: none;
+  border-bottom: 1px solid var(--parchment-3);
+  background: transparent;
+  width: 100%;
+  outline: none;
+  padding: 0.25rem 0;
+}
+
+.settings-input:focus { border-bottom-color: var(--gold); }
+
+.risk-options {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.risk-option {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 6px 14px;
+  border: 1px solid var(--parchment-3);
+  cursor: pointer;
+  color: var(--ink-3);
+}
+
+.risk-option input { display: none; }
+.risk-option.risk-active, .risk-option:has(input:checked) {
+  border-color: var(--gold);
+  color: var(--gold);
+}

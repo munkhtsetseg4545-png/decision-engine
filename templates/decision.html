@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine — Layer 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-mark">DE</div>
+      <div class="header-title">
+        <span class="header-layer">Layer 3</span>
+        <span class="header-name">Decision — Action</span>
+      </div>
+      <div class="header-right">
+        <a href="/" class="history-link">← Нүүр</a>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  </header>
+
+  <main class="main">
+    <div class="result-shell">
+
+      {% if not result %}
+      <!-- Score оруулах -->
+      <div class="ticker-card" style="text-align:center;">
+        <p class="ticker-label">Scoring оноо оруулна уу</p>
+        <input type="number" id="scoreInput" class="ticker-input" placeholder="0–100" min="0" max="100" style="max-width:200px;">
+        {% if not settings.capital %}
+        <p style="font-family:var(--font-mono);font-size:11px;color:var(--danger);margin:0.75rem 0;">
+          ⚠ Capital тохируулаагүй байна — <a href="/settings" style="color:var(--gold);">Settings →</a>
+        </p>
+        {% endif %}
+        <div style="margin-top:1rem;">
+          <input type="text" id="tickerInput" class="ticker-input" placeholder="Ticker (AAPL)" maxlength="10" style="max-width:200px;font-size:20px;">
+        </div>
+        <button class="btn btn-primary" style="margin-top:1.25rem;" onclick="calculate()">Тооцоолох →</button>
+      </div>
+
+      {% else %}
+      <!-- Үр дүн -->
+      <div class="result-hero">
+        <div class="result-score-wrap">
+          <svg class="score-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"/>
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
+              stroke-dasharray="326.7" stroke-dashoffset="{{ 326.7 - (score / 100 * 326.7) }}"/>
+          </svg>
+          <div class="result-score-inner">
+            <span class="result-score-num">{{ score }}</span>
+            <span class="result-score-denom">/100</span>
+          </div>
+        </div>
+        <div class="result-verdict">
+          <div class="result-ticker-badge">{{ ticker }}</div>
+          <div class="verdict-badge
+            {% if result.action == 'BUY' %}badge-go
+            {% elif result.action == 'SMALL POSITION' %}badge-watch
+            {% else %}badge-nogo{% endif %}">
+            {{ result.action }}
+          </div>
+          <p class="verdict-interp" style="margin-top:0.5rem;">{{ result.execution }}</p>
+        </div>
+      </div>
+
+      <div class="result-grid" style="margin-top:1rem;">
+        <section class="result-section">
+          <h3 class="section-heading">Position size</h3>
+          <div style="font-family:var(--font-display);font-size:36px;font-weight:600;color:var(--gold);">
+            {{ result.size_pct }}%
+          </div>
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--ink-3);margin-top:4px;">
+            ${{ "{:,.0f}".format(result.position_value) }}
+          </div>
+        </section>
+
+        <section class="result-section">
+          <h3 class="section-heading">Risk check</h3>
+          <div style="font-family:var(--font-mono);font-size:12px;
+            color:{% if result.risk_ok %}var(--safe){% else %}var(--danger){% endif %};">
+            {{ result.risk_status }}
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-top:8px;">
+            Capital: ${{ "{:,.0f}".format(settings.capital) }}<br>
+            Max position: {{ settings.max_position }}%
+          </div>
+        </section>
+
+        <section class="result-section full-width">
+          <h3 class="section-heading">Execution план</h3>
+          <div class="sizing-box">{{ result.execution }}</div>
+        </section>
+      </div>
+
+      <div class="nav-row centered" style="margin-top:1.5rem;">
+        <a href="/decision" class="btn btn-ghost">Дахин тооцоолох</a>
+        <a href="/history" class="btn btn-primary">History →</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+
+<script>
+function calculate() {
+  const score = document.getElementById('scoreInput').value;
+  const ticker = document.getElementById('tickerInput').value.trim().toUpperCase();
+  if (!score) return;
+  window.location.href = '/decision?score=' + score + '&ticker=' + (ticker || '');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('scoreInput');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+});
+</script>
+</body>
+</html>

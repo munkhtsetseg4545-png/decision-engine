@@ -60,22 +60,30 @@ def generate_ai_conclusion(ticker: str, answers: Dict[str, str]) -> str:
         return "API key тохируулагдаагүй."
 
     a = answers
-    prompt = f"""{ticker} судалгаа:
-Бизнес: {a.get('what_do','')} | Орлого: {a.get('revenue','')} | Moat: {a.get('moat','')}
-Удирдлага: {a.get('management','')} | Өсөлт: {a.get('growth','')}
-Эрсдэл: {a.get('risks','')} | Worst case: {a.get('downside','')} | Үнэлгээ: {a.get('valuation','')}
+    prompt = f"""{ticker} хувьцааны судалгааг үндэслэн монголоор дүгнэлт бич.
+Тоо, гарчиг, markdown (#, *, **) огт бүү ашигла. Зөвхөн энгийн текст.
+Яг 4 мөр бич, тус бүр нэг өгүүлбэр:
 
-Монголоор 4 мөр дүгнэлт бич. Markdown бүү ашигла:
-1. Давуу тал:
-2. Сул тал:
-3. Гол эрсдэл:
-4. Дүгнэлт:"""
+Давуу тал: [энд бич]
+Сул тал: [энд бич]
+Гол эрсдэл: [энд бич]
+Дүгнэлт: [энд бич]
+
+Судалгаа:
+Бизнес: {a.get('what_do','')}
+Орлого: {a.get('revenue','')}
+Moat: {a.get('moat','')}
+Удирдлага: {a.get('management','')}
+Өсөлт: {a.get('growth','')}
+Эрсдэл: {a.get('risks','')}
+Worst case: {a.get('downside','')}
+Үнэлгээ: {a.get('valuation','')}"""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=300,
+            max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
         return msg.content[0].text

@@ -27,6 +27,7 @@
     </div>
   </header>
 
+  <!-- TICKER -->
   <main class="main" id="tickerView">
     <div class="quiz-shell">
       <div class="ticker-card">
@@ -38,27 +39,97 @@
     </div>
   </main>
 
-  <main class="main hidden" id="phaseView">
+  <!-- PHASE 1 -->
+  <main class="main hidden" id="phase0View">
     <div class="quiz-shell" style="max-width:680px;">
       <div class="phase-header">
-        <div class="q-counter">
-          Phase <span id="phaseNum">1</span><span class="q-total"> / 3</span>
-          <span class="q-ticker" id="phaseTicker"></span>
-        </div>
-        <div class="phase-title" id="phaseTitle"></div>
+        <div class="q-counter">Phase 1 / 3 <span class="q-ticker" id="ticker0"></span></div>
+        <div class="phase-title">Business — Бизнесийг ойлгох</div>
         <div class="phase-timer-wrap">
-          <div class="phase-timer-bar"><div class="phase-timer-fill" id="timerFill"></div></div>
-          <span class="phase-timer-label" id="timerLabel">20:00</span>
+          <div class="phase-timer-bar"><div class="phase-timer-fill" id="fill0"></div></div>
+          <span class="phase-timer-label" id="label0">20:00</span>
         </div>
       </div>
-      <div id="questionsWrap"></div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">1. Энэ компани юу хийдэг вэ? Үндсэн бизнес нь юу вэ?</p>
+        <textarea id="ans_what_do" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">2. Хэрхэн мөнгө олдог вэ? Орлогын эх үүсвэр нь юу вэ?</p>
+        <textarea id="ans_revenue" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">3. Үндсэн бүтээгдэхүүн/үйлчилгээ нь юу вэ?</p>
+        <textarea id="ans_product" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
       <div class="nav-row" style="margin-top:1.5rem;">
         <button class="btn btn-ghost" onclick="skipTimer()">Timer алгасах</button>
-        <button class="btn btn-primary" id="btnNext" onclick="nextPhase()">Дараах →</button>
+        <button class="btn btn-primary" onclick="goPhase(1)">Дараах →</button>
       </div>
     </div>
   </main>
 
+  <!-- PHASE 2 -->
+  <main class="main hidden" id="phase1View">
+    <div class="quiz-shell" style="max-width:680px;">
+      <div class="phase-header">
+        <div class="q-counter">Phase 2 / 3 <span class="q-ticker" id="ticker1"></span></div>
+        <div class="phase-title">Moat & Management — Давуу тал ба Удирдлага</div>
+        <div class="phase-timer-wrap">
+          <div class="phase-timer-bar"><div class="phase-timer-fill" id="fill1"></div></div>
+          <span class="phase-timer-label" id="label1">20:00</span>
+        </div>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">1. Өрсөлдөгчдөөс ялгарах competitive advantage (moat) байгаа юу?</p>
+        <textarea id="ans_moat" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">2. Удирдлага хүчтэй юу? Shareholder-д ээлтэй юу?</p>
+        <textarea id="ans_management" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">3. Өсөлт тогтвортой юу? Ирээдүйд өсөх боломж байна уу?</p>
+        <textarea id="ans_growth" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="nav-row" style="margin-top:1.5rem;">
+        <button class="btn btn-ghost" onclick="skipTimer()">Timer алгасах</button>
+        <button class="btn btn-primary" onclick="goPhase(2)">Дараах →</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- PHASE 3 -->
+  <main class="main hidden" id="phase2View">
+    <div class="quiz-shell" style="max-width:680px;">
+      <div class="phase-header">
+        <div class="q-counter">Phase 3 / 3 <span class="q-ticker" id="ticker2"></span></div>
+        <div class="phase-title">Risk & Valuation — Эрсдэл ба Үнэлгээ</div>
+        <div class="phase-timer-wrap">
+          <div class="phase-timer-bar"><div class="phase-timer-fill" id="fill2"></div></div>
+          <span class="phase-timer-label" id="label2">20:00</span>
+        </div>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">1. Хамгийн том эрсдэлүүд юу вэ?</p>
+        <textarea id="ans_risks" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">2. Юу буруу болж болох вэ? Worst case юу вэ?</p>
+        <textarea id="ans_downside" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="q-card" style="margin-bottom:1rem;">
+        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">3. Хувьцаа хямд уу, үнэтэй юу? Яагаад?</p>
+        <textarea id="ans_valuation" class="dw-textarea" placeholder="• Энд бичнэ..."></textarea>
+      </div>
+      <div class="nav-row" style="margin-top:1.5rem;">
+        <button class="btn btn-ghost" onclick="skipTimer()">Timer алгасах</button>
+        <button class="btn btn-primary" id="btnSubmit" onclick="submitAll()">Thesis үүсгэх ✓</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- THESIS -->
   <main class="main hidden" id="thesisView">
     <div class="result-shell">
       <div class="result-hero">
@@ -81,30 +152,25 @@
 </div>
 
 <script>
-// Phases data from server
-const PHASES = {{ phases | tojson }};
-
-// State
-let currentPhase = 0;
 let ticker = "";
 let timerInterval = null;
-let elapsedInterval = null;
-let secondsLeft = 0;
 let elapsedSec = 0;
+let elapsedInterval = null;
+let currentPhaseIdx = 0;
+let secondsLeft = 1200;
 
-// All answers stored here - key: question key, value: answer text
-const answers = {};
+const KEYS = ['what_do','revenue','product','moat','management','growth','risks','downside','valuation'];
 
-// Start
 function startDeepWork() {
   const val = document.getElementById('tickerInput').value.trim().toUpperCase();
   if (!val) { document.getElementById('tickerInput').focus(); return; }
   ticker = val;
+  ['ticker0','ticker1','ticker2'].forEach(id => document.getElementById(id).textContent = ticker);
   document.getElementById('tickerView').classList.add('hidden');
-  document.getElementById('phaseView').classList.remove('hidden');
-  document.getElementById('phaseTicker').textContent = ticker;
-  elapsedInterval = setInterval(() => { elapsedSec++; }, 1000);
-  renderPhase(0);
+  document.getElementById('phase0View').classList.remove('hidden');
+  elapsedInterval = setInterval(() => elapsedSec++, 1000);
+  startTimer(0);
+  addBullets();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -112,30 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') startDeepWork(); });
 });
 
-// Render a phase
-function renderPhase(idx) {
-  currentPhase = idx;
-  const phase = PHASES[idx];
-
-  document.getElementById('phaseNum').textContent = idx + 1;
-  document.getElementById('phaseTitle').textContent = phase.title;
-  document.getElementById('progressFill').style.width = (idx / 3 * 100) + '%';
-  document.getElementById('btnNext').textContent = idx === 2 ? 'Thesis үүсгэх ✓' : 'Дараах →';
-
-  let html = '';
-  phase.questions.forEach((q, i) => {
-    const saved = answers[q.key] || '';
-    html += `
-      <div class="q-card" style="margin-bottom:1rem;">
-        <p class="q-text" style="font-size:16px;margin-bottom:0.75rem;">${i+1}. ${q.text}</p>
-        <textarea id="ta_${q.key}" class="dw-textarea" placeholder="• Энд бичнэ..." oninput="answers['${q.key}'] = this.value">${saved}</textarea>
-      </div>`;
-  });
-  document.getElementById('questionsWrap').innerHTML = html;
-
-  // Auto bullet
-  phase.questions.forEach(q => {
-    const ta = document.getElementById('ta_' + q.key);
+function addBullets() {
+  KEYS.forEach(key => {
+    const ta = document.getElementById('ans_' + key);
     if (!ta) return;
     if (!ta.value) ta.value = '• ';
     ta.addEventListener('keydown', function(e) {
@@ -148,66 +193,57 @@ function renderPhase(idx) {
       }
     });
   });
-
-  startPhaseTimer(phase.duration_min);
 }
 
-// Save current phase answers to answers object
-function savePhase() {
-  const phase = PHASES[currentPhase];
-  phase.questions.forEach(q => {
-    const ta = document.getElementById('ta_' + q.key);
-    if (ta) answers[q.key] = ta.value;
-  });
+function goPhase(idx) {
+  document.getElementById('phase' + (idx-1) + 'View').classList.add('hidden');
+  document.getElementById('phase' + idx + 'View').classList.remove('hidden');
+  document.getElementById('progressFill').style.width = (idx / 3 * 100) + '%';
+  currentPhaseIdx = idx;
+  startTimer(idx);
+  addBullets();
 }
 
-// Next phase
-function nextPhase() {
-  savePhase();
-  if (currentPhase < 2) {
-    renderPhase(currentPhase + 1);
-  } else {
-    submitAll();
-  }
-}
-
-// Timer
-function startPhaseTimer(mins) {
+function startTimer(idx) {
   clearInterval(timerInterval);
-  secondsLeft = mins * 60;
-  updateTimer();
+  secondsLeft = 1200;
+  updateTimer(idx);
   timerInterval = setInterval(() => {
     secondsLeft--;
-    updateTimer();
+    updateTimer(idx);
     if (secondsLeft <= 0) clearInterval(timerInterval);
   }, 1000);
 }
 
-function updateTimer() {
+function updateTimer(idx) {
   const m = String(Math.floor(secondsLeft / 60)).padStart(2,'0');
   const s = String(secondsLeft % 60).padStart(2,'0');
   const t = m + ':' + s;
   document.getElementById('phaseTimer').textContent = t;
-  document.getElementById('timerLabel').textContent = t;
-  const total = PHASES[currentPhase].duration_min * 60;
-  document.getElementById('timerFill').style.width = (secondsLeft / total * 100) + '%';
+  const lbl = document.getElementById('label' + idx);
+  const fill = document.getElementById('fill' + idx);
+  if (lbl) lbl.textContent = t;
+  if (fill) fill.style.width = (secondsLeft / 1200 * 100) + '%';
 }
 
 function skipTimer() {
   clearInterval(timerInterval);
   secondsLeft = 0;
-  updateTimer();
+  updateTimer(currentPhaseIdx);
 }
 
-// Submit
 async function submitAll() {
   clearInterval(timerInterval);
   clearInterval(elapsedInterval);
   document.getElementById('progressFill').style.width = '100%';
-  document.getElementById('btnNext').textContent = 'Боловсруулж байна...';
-  document.getElementById('btnNext').disabled = true;
+  document.getElementById('btnSubmit').textContent = 'Боловсруулж байна...';
+  document.getElementById('btnSubmit').disabled = true;
 
-  console.log('Sending answers:', answers);
+  const answers = {};
+  KEYS.forEach(key => {
+    const ta = document.getElementById('ans_' + key);
+    answers[key] = ta ? ta.value : '';
+  });
 
   const res = await fetch('/api/deep-work/save', {
     method: 'POST',
@@ -216,21 +252,24 @@ async function submitAll() {
   });
   const data = await res.json();
 
-  document.getElementById('phaseView').classList.add('hidden');
+  document.getElementById('phase2View').classList.add('hidden');
   document.getElementById('thesisView').classList.remove('hidden');
   document.getElementById('thesisTicker').textContent = ticker;
   document.getElementById('thesisBox').textContent = data.thesis;
 }
 
-// Restart
 function restartDW() {
-  currentPhase = 0;
   ticker = "";
   elapsedSec = 0;
-  for (const k in answers) delete answers[k];
   clearInterval(timerInterval);
   clearInterval(elapsedInterval);
-  document.getElementById('thesisView').classList.add('hidden');
+  KEYS.forEach(key => {
+    const ta = document.getElementById('ans_' + key);
+    if (ta) ta.value = '';
+  });
+  ['phase0View','phase1View','phase2View','thesisView'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
   document.getElementById('tickerView').classList.remove('hidden');
   document.getElementById('tickerInput').value = '';
   document.getElementById('progressFill').style.width = '0%';

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine — Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-mark">DE</div>
+      <div class="header-title">
+        <span class="header-layer">Layer 5</span>
+        <span class="header-name">Analytics</span>
+      </div>
+      <div class="header-right">
+        
+        <a href="/" class="history-link">Нүүр</a>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  </header>
+
+  <main class="main" style="align-items:flex-start;">
+    <div class="result-shell">
+
+      {% if not data %}
+      <div class="empty-state">
+        Trade Log-д хангалттай мэдээлэл байхгүй байна.<br>
+        <a href="/trade-log" class="btn btn-primary" style="margin-top:1rem;display:inline-block;">Trade Log →</a>
+      </div>
+
+      {% else %}
+
+      <!-- Summary -->
+      <h3 class="section-heading" style="margin-bottom:0.75rem;">Нийт дүн</h3>
+      <div class="result-grid" style="margin-bottom:1.5rem;">
+        <section class="result-section">
+          <h3 class="section-heading">Win rate</h3>
+          <div style="font-family:var(--font-display);font-size:32px;font-weight:600;color:var(--gold);">
+            {{ data.summary.win_rate }}%
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">
+            {{ data.summary.wins }}W / {{ data.summary.losses }}L / {{ data.summary.total_trades }} нийт
+          </div>
+        </section>
+
+        <section class="result-section">
+          <h3 class="section-heading">Expectancy</h3>
+          <div style="font-family:var(--font-display);font-size:32px;font-weight:600;
+            color:{% if data.summary.expectancy > 0 %}var(--safe){% else %}var(--danger){% endif %};">
+            ${{ data.summary.expectancy }}
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">trade бүрийн дундаж</div>
+        </section>
+
+        <section class="result-section">
+          <h3 class="section-heading">Total PnL</h3>
+          <div style="font-family:var(--font-display);font-size:28px;font-weight:600;
+            color:{% if data.summary.total_pnl > 0 %}var(--safe){% else %}var(--danger){% endif %};">
+            ${{ data.summary.total_pnl }}
+          </div>
+        </section>
+
+        <section class="result-section">
+          <h3 class="section-heading">Avg R</h3>
+          <div style="font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--gold);">
+            {{ data.summary.avg_r }}x
+          </div>
+        </section>
+
+        <section class="result-section">
+          <h3 class="section-heading">Avg win</h3>
+          <div style="font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--safe);">
+            ${{ data.summary.avg_win }}
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">Max: ${{ data.summary.max_win }}</div>
+        </section>
+
+        <section class="result-section">
+          <h3 class="section-heading">Avg loss</h3>
+          <div style="font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--danger);">
+            ${{ data.summary.avg_loss }}
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">Max: ${{ data.summary.max_loss }}</div>
+        </section>
+      </div>
+
+      <!-- Score Analysis -->
+      {% if data.score_analysis %}
+      <h3 class="section-heading" style="margin-bottom:0.75rem;">Score-р дүн шинжилгээ</h3>
+      <section class="result-section full-width" style="margin-bottom:1.5rem;">
+        <table style="width:100%;font-family:var(--font-mono);font-size:12px;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--parchment-3);">
+              <th style="text-align:left;padding:6px 8px;color:var(--gold-dim);">Score</th>
+              <th style="text-align:right;padding:6px 8px;color:var(--gold-dim);">Count</th>
+              <th style="text-align:right;padding:6px 8px;color:var(--gold-dim);">Win rate</th>
+              <th style="text-align:right;padding:6px 8px;color:var(--gold-dim);">Avg PnL</th>
+              <th style="text-align:right;padding:6px 8px;color:var(--gold-dim);">Avg R</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for band, stats in data.score_analysis.items() %}
+            <tr style="border-bottom:1px solid var(--parchment-2);">
+              <td style="padding:8px;color:var(--gold);font-weight:500;">{{ band }}</td>
+              <td style="text-align:right;padding:8px;color:var(--ink-2);">{{ stats.count }}</td>
+              <td style="text-align:right;padding:8px;
+                color:{% if stats.win_rate >= 50 %}var(--safe){% else %}var(--danger){% endif %};">
+                {{ stats.win_rate }}%
+              </td>
+              <td style="text-align:right;padding:8px;
+                color:{% if stats.avg_pnl > 0 %}var(--safe){% else %}var(--danger){% endif %};">
+                ${{ stats.avg_pnl }}
+              </td>
+              <td style="text-align:right;padding:8px;color:var(--ink-2);">{{ stats.avg_r }}x</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+      {% endif %}
+
+      <!-- Rule Break -->
+      <h3 class="section-heading" style="margin-bottom:0.75rem;">Дүрэм дагасан эсэх</h3>
+      <div class="result-grid" style="margin-bottom:1.5rem;">
+        <section class="result-section">
+          <h3 class="section-heading">Дүрэм дагасан</h3>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-2);">
+            {{ data.rule_break.followed_count }} trade<br>
+            Avg PnL: <span style="color:{% if data.rule_break.followed_avg_pnl > 0 %}var(--safe){% else %}var(--danger){% endif %};">
+              ${{ data.rule_break.followed_avg_pnl }}</span><br>
+            Avg R: {{ data.rule_break.followed_avg_r }}x
+          </div>
+        </section>
+        <section class="result-section">
+          <h3 class="section-heading">Дүрэм зөрчсөн</h3>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-2);">
+            {{ data.rule_break.broken_count }} trade<br>
+            Avg PnL: <span style="color:{% if data.rule_break.broken_avg_pnl > 0 %}var(--safe){% else %}var(--danger){% endif %};">
+              ${{ data.rule_break.broken_avg_pnl }}</span><br>
+            Avg R: {{ data.rule_break.broken_avg_r }}x
+          </div>
+        </section>
+      </div>
+
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

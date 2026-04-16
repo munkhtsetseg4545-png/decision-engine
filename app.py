@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify
 from scoring import score_answers, QUESTIONS
 from deep_work import PHASES, generate_thesis
 from decision import calculate_decision
+from analytics import build_analytics
 from database import (init_db, init_trade_log, save_session, get_all_sessions,
                       get_ticker_sessions, save_deep_work, get_deep_work_sessions,
                       get_db, save_settings, get_settings, save_trade, update_trade,
@@ -78,6 +79,16 @@ def trade_log():
     trades = get_all_trades()
     analytics = get_trade_analytics()
     return render_template("trade_log.html", trades=trades, analytics=analytics)
+
+
+@app.route("/analytics")
+def analytics():
+    trades = get_all_trades()
+    closed = [t for t in trades if t["status"] == "closed"]
+    if not closed:
+        return render_template("analytics.html", data=None)
+    data = build_analytics(closed)
+    return render_template("analytics.html", data=data)
 
 
 @app.route("/api/trade", methods=["POST"])

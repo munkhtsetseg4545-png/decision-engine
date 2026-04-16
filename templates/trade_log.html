@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision Engine — Trade Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo-mark">DE</div>
+      <div class="header-title">
+        <span class="header-layer">Layer 4</span>
+        <span class="header-name">Trade Log</span>
+      </div>
+      <div class="header-right">
+        <a href="/" class="history-link">← Нүүр</a>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+  </header>
+
+  <main class="main" style="align-items:flex-start;">
+    <div class="result-shell">
+
+      <!-- Analytics -->
+      {% if analytics %}
+      <div class="result-grid" style="margin-bottom:1.5rem;">
+        <section class="result-section">
+          <h3 class="section-heading">Win rate</h3>
+          <div style="font-family:var(--font-display);font-size:32px;font-weight:600;color:var(--gold);">{{ analytics.winrate }}%</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">{{ analytics.wins }}W / {{ analytics.losses }}L</div>
+        </section>
+        <section class="result-section">
+          <h3 class="section-heading">Expectancy</h3>
+          <div style="font-family:var(--font-display);font-size:32px;font-weight:600;color:{% if analytics.expectancy > 0 %}var(--safe){% else %}var(--danger){% endif %};">
+            ${{ analytics.expectancy }}
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);">нэг trade-д дундаж</div>
+        </section>
+        <section class="result-section">
+          <h3 class="section-heading">Avg win</h3>
+          <div style="font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--safe);">${{ analytics.avg_win }}</div>
+        </section>
+        <section class="result-section">
+          <h3 class="section-heading">Avg loss</h3>
+          <div style="font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--danger);">${{ analytics.avg_loss }}</div>
+        </section>
+      </div>
+      {% endif %}
+
+      <!-- New Trade -->
+      <div class="q-card" style="margin-bottom:1.5rem;">
+        <div class="q-meta-row" style="margin-bottom:1rem;">
+          <span class="q-cat">Шинэ trade нэмэх</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+          <div>
+            <label class="settings-label">Ticker</label>
+            <input type="text" id="n_ticker" class="settings-input" placeholder="AAPL">
+          </div>
+          <div>
+            <label class="settings-label">Setup type</label>
+            <input type="text" id="n_setup" class="settings-input" placeholder="breakout, dca, reversal...">
+          </div>
+          <div>
+            <label class="settings-label">Score</label>
+            <input type="number" id="n_score" class="settings-input" placeholder="0-100">
+          </div>
+          <div>
+            <label class="settings-label">Position size ($)</label>
+            <input type="number" id="n_size" class="settings-input" placeholder="1000">
+          </div>
+          <div>
+            <label class="settings-label">Planned entry</label>
+            <input type="number" id="n_entry" class="settings-input" placeholder="175.00">
+          </div>
+          <div>
+            <label class="settings-label">Stop loss</label>
+            <input type="number" id="n_stop" class="settings-input" placeholder="168.00">
+          </div>
+          <div>
+            <label class="settings-label">Target</label>
+            <input type="number" id="n_target" class="settings-input" placeholder="190.00">
+          </div>
+          <div>
+            <label class="settings-label">Decision</label>
+            <select id="n_decision" class="settings-input" style="font-family:var(--font-mono);font-size:14px;">
+              <option value="buy">Buy</option>
+              <option value="sell">Sell</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:0.75rem;">
+          <label class="settings-label">Thesis</label>
+          <textarea id="n_thesis" class="dw-textarea" style="min-height:60px;" placeholder="Энд бичнэ..."></textarea>
+        </div>
+        <div class="nav-row" style="margin-top:1rem;">
+          <button class="btn btn-primary" onclick="addTrade()">Trade нэмэх +</button>
+        </div>
+      </div>
+
+      <!-- Trade List -->
+      <h3 class="section-heading" style="margin-bottom:0.75rem;">Бүх trades ({{ trades|length }})</h3>
+
+      {% if trades %}
+        {% for t in trades %}
+        <div class="history-card" id="trade-{{ t.id }}" style="border-left-color:{% if t.status == 'closed' %}{% if t.pnl > 0 %}var(--safe){% else %}var(--danger){% endif %}{% else %}var(--gold-dim){% endif %};">
+          <div class="history-card-header">
+            <span class="h-ticker-badge">{{ t.ticker }}</span>
+            <span class="h-date">{{ t.created_at }}</span>
+            {% if t.setup_type %}<span style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);">{{ t.setup_type }}</span>{% endif %}
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--gold);margin-left:auto;">score: {{ t.score }}</span>
+            <span class="verdict-badge {% if t.status == 'open' %}badge-watch{% elif t.pnl > 0 %}badge-go{% else %}badge-nogo{% endif %}" style="font-size:10px;padding:2px 8px;">
+              {% if t.status == 'open' %}OPEN{% else %}{{ t.pnl|round(2) }}${% endif %}
+            </span>
+            <button class="delete-btn" onclick="deleteTrade('{{ t.id }}')">Устгах</button>
+          </div>
+
+          {% if t.thesis %}<p class="h-interp" style="font-size:13px;">{{ t.thesis }}</p>{% endif %}
+
+          <div class="h-answers" style="margin-top:0.5rem;">
+            <span class="h-ans-item">Entry: {{ t.planned_entry }}</span>
+            <span class="h-ans-item">Stop: {{ t.planned_stop }}</span>
+            <span class="h-ans-item">Target: {{ t.planned_target }}</span>
+            <span class="h-ans-item">Size: ${{ t.position_size }}</span>
+            {% if t.status == 'closed' %}
+            <span class="h-ans-item">R: {{ t.r_multiple }}x</span>
+            <span class="h-ans-item">Rule: {% if t.rule_followed %}✓{% else %}✗{% endif %}</span>
+            {% if t.emotion %}<span class="h-ans-item">Emotion: {{ t.emotion }}</span>{% endif %}
+            {% endif %}
+          </div>
+
+          {% if t.status == 'open' %}
+          <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--parchment-3);">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.5rem;">
+              <div>
+                <label class="settings-label">Actual exit</label>
+                <input type="number" id="exit_{{ t.id }}" class="settings-input" style="font-size:14px;" placeholder="{{ t.planned_target }}">
+              </div>
+              <div>
+                <label class="settings-label">PnL ($)</label>
+                <input type="number" id="pnl_{{ t.id }}" class="settings-input" style="font-size:14px;" placeholder="0">
+              </div>
+              <div>
+                <label class="settings-label">Emotion</label>
+                <input type="text" id="emo_{{ t.id }}" class="settings-input" style="font-size:14px;" placeholder="calm, fear...">
+              </div>
+            </div>
+            <div style="margin-top:0.5rem;display:flex;gap:0.75rem;align-items:center;">
+              <label style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:4px;">
+                <input type="checkbox" id="rule_{{ t.id }}" checked> Rule дагасан
+              </label>
+              <button class="btn btn-primary" style="padding:4px 14px;font-size:11px;" onclick="closeTrade('{{ t.id }}')">Хаах ✓</button>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">Trade байхгүй байна. Дээрх формоор нэмнэ үү.</div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+
+<script>
+async function addTrade() {
+  const trade = {
+    ticker: document.getElementById('n_ticker').value.trim().toUpperCase(),
+    setup_type: document.getElementById('n_setup').value.trim(),
+    thesis: document.getElementById('n_thesis').value.trim(),
+    score: parseFloat(document.getElementById('n_score').value) || 0,
+    position_size: parseFloat(document.getElementById('n_size').value) || 0,
+    planned_entry: parseFloat(document.getElementById('n_entry').value) || 0,
+    planned_stop: parseFloat(document.getElementById('n_stop').value) || 0,
+    planned_target: parseFloat(document.getElementById('n_target').value) || 0,
+    decision: document.getElementById('n_decision').value,
+    status: 'open',
+  };
+  if (!trade.ticker) return;
+  await fetch('/api/trade', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(trade) });
+  location.reload();
+}
+
+async function closeTrade(id) {
+  const data = {
+    actual_exit: parseFloat(document.getElementById('exit_' + id).value) || 0,
+    pnl: parseFloat(document.getElementById('pnl_' + id).value) || 0,
+    emotion: document.getElementById('emo_' + id).value,
+    rule_followed: document.getElementById('rule_' + id).checked,
+    status: 'closed',
+  };
+  await fetch('/api/trade/' + id, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+  location.reload();
+}
+
+async function deleteTrade(id) {
+  if (!confirm('Устгах уу?')) return;
+  await fetch('/api/trade/' + id, { method: 'DELETE' });
+  document.getElementById('trade-' + id).remove();
+}
+</script>
+</body>
+</html>

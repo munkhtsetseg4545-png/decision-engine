@@ -1,20 +1,23 @@
+import uuid
 from flask import Flask, render_template, request, jsonify
 from scoring import score_answers, QUESTIONS
 from deep_work import PHASES, generate_thesis
 from decision import calculate_decision
-from database import (init_db, save_session, get_all_sessions, get_ticker_sessions,
-                      save_deep_work, get_deep_work_sessions, get_db,
-                      save_settings, get_settings)
+from database import (init_db, init_trade_log, save_session, get_all_sessions,
+                      get_ticker_sessions, save_deep_work, get_deep_work_sessions,
+                      get_db, save_settings, get_settings, save_trade, update_trade,
+                      get_all_trades, get_trade, delete_trade, get_trade_analytics)
 
 app = Flask(__name__)
 
 with app.app_context():
     init_db()
+    init_trade_log()
 
 
 def phases_to_dict():
-    return [{"key": p.key, "title": p.title, "duration_min": p.duration_min, "questions": p.questions}
-            for p in PHASES]
+    return [{"key": p.key, "title": p.title, "duration_min": p.duration_min,
+             "questions": p.questions} for p in PHASES]
 
 
 @app.route("/")
@@ -70,6 +73,34 @@ def decision():
                            result=result, settings=settings)
 
 
+@app.route("/trade-log")
+def trade_log():
+    trades = get_all_trades()
+    analytics = get_trade_analytics()
+    return render_template("trade_log.html", trades=trades, analytics=analytics)
+
+
+@app.route("/api/trade", methods=["POST"])
+def add_trade():
+    data = request.get_json()
+    data["id"] = str(uuid.uuid4())[:8]
+    save_trade(data)
+    return jsonify({"ok": True, "id": data["id"]})
+
+
+@app.route("/api/trade/<trade_id>", methods=["PUT"])
+def edit_trade(trade_id):
+    data = request.get_json()
+    update_trade(trade_id, data)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/trade/<trade_id>", methods=["DELETE"])
+def remove_trade(trade_id):
+    delete_trade(trade_id)
+    return jsonify({"ok": True})
+
+
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     if request.method == "POST":
@@ -95,8 +126,10 @@ def history():
 @app.route("/delete/scoring/<int:session_id>", methods=["POST"])
 def delete_scoring(session_id):
     conn = get_db()
-    conn.execute("DELETE FROM scoring_sessions WHERE id=?", (session_id,))
+    cur = conn.cursor()
+    cur.execute("DELETE FROM scoring_sessions WHERE id=%s", (session_id,))
     conn.commit()
+    cur.close()
     conn.close()
     return jsonify({"ok": True})
 
@@ -104,8 +137,10 @@ def delete_scoring(session_id):
 @app.route("/delete/deepwork/<int:session_id>", methods=["POST"])
 def delete_deepwork(session_id):
     conn = get_db()
-    conn.execute("DELETE FROM deep_work_sessions WHERE id=?", (session_id,))
+    cur = conn.cursor()
+    cur.execute("DELETE FROM deep_work_sessions WHERE id=%s", (session_id,))
     conn.commit()
+    cur.close()
     conn.close()
     return jsonify({"ok": True})
 

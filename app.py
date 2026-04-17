@@ -26,6 +26,34 @@ def index():
     return render_template("index.html")
 
 
+@app.route("/demo")
+def demo():
+    return render_template("demo.html")
+
+
+@app.route("/api/demo")
+def api_demo():
+    ticker = request.args.get("ticker", "").strip().upper()
+    if not ticker:
+        return jsonify({"error": "Ticker оруулна уу"})
+    try:
+        from demo import run_demo
+        from decision import calculate_decision
+        result = run_demo(ticker)
+        if "error" in result:
+            return jsonify(result)
+        settings = get_settings()
+        dec = calculate_decision(
+            result["score"]["score"],
+            settings["capital"],
+            settings["max_position"]
+        )
+        result["decision"] = dec
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
 @app.route("/deep-work")
 def deep_work():
     return render_template("deep_work.html", phases=phases_to_dict())

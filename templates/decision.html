@@ -28,28 +28,35 @@
     <div class="result-shell">
 
       {% if not result %}
-      <!-- Score оруулах -->
       <div class="ticker-card" style="text-align:center;">
-        <p class="ticker-label">Scoring оноо оруулна уу</p>
+        <p class="ticker-label">Ticker</p>
+        <input type="text" id="tickerInput" class="ticker-input" placeholder="AAPL" maxlength="10" style="max-width:200px;">
+        <p class="ticker-label" style="margin-top:1rem;">Scoring оноо</p>
         <input type="number" id="scoreInput" class="ticker-input" placeholder="0–100" min="0" max="100" style="max-width:200px;">
+
         {% if not settings.capital %}
-        <p style="font-family:var(--font-mono);font-size:11px;color:var(--danger);margin:0.75rem 0;">
-          ⚠ Capital тохируулаагүй байна — <a href="/settings" style="color:var(--gold);">Settings →</a>
-        </p>
-        {% endif %}
-        <div style="margin-top:1rem;">
-          <input type="text" id="tickerInput" class="ticker-input" placeholder="Ticker (AAPL)" maxlength="10" style="max-width:200px;font-size:20px;">
+        <div class="hard-fail-notice" style="display:block;margin:1rem 0;text-align:left;">
+          ⚠ Capital тохируулаагүй байна —
+          <a href="/settings" style="color:var(--gold);">Settings-д оруулна уу →</a>
         </div>
+        {% endif %}
+
         <button class="btn btn-primary" style="margin-top:1.25rem;" onclick="calculate()">Тооцоолох →</button>
       </div>
 
       {% else %}
-      <!-- Үр дүн -->
+
+      {% if result.warnings %}
+      {% for w in result.warnings %}
+      <div class="hard-fail-notice" style="display:block;margin-bottom:1rem;">{{ w }}</div>
+      {% endfor %}
+      {% endif %}
+
       <div class="result-hero">
         <div class="result-score-wrap">
           <svg class="score-ring" viewBox="0 0 120 120">
             <circle class="ring-bg" cx="60" cy="60" r="52"/>
-            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
+            <circle class="ring-fill" cx="60" cy="60" r="52"
               stroke-dasharray="326.7" stroke-dashoffset="{{ 326.7 - (score / 100 * 326.7) }}"/>
           </svg>
           <div class="result-score-inner">
@@ -58,7 +65,7 @@
           </div>
         </div>
         <div class="result-verdict">
-          <div class="result-ticker-badge">{{ ticker }}</div>
+          {% if ticker %}<div class="result-ticker-badge">{{ ticker }}</div>{% endif %}
           <div class="verdict-badge
             {% if result.action == 'BUY' %}badge-go
             {% elif result.action == 'SMALL POSITION' %}badge-watch
@@ -76,7 +83,7 @@
             {{ result.size_pct }}%
           </div>
           <div style="font-family:var(--font-mono);font-size:13px;color:var(--ink-3);margin-top:4px;">
-            ${{ "{:,.0f}".format(result.position_value) }}
+            {% if result.position_value > 0 %}${{ "{:,.0f}".format(result.position_value) }}{% else %}Capital тохируулаагүй{% endif %}
           </div>
         </section>
 
@@ -87,7 +94,7 @@
             {{ result.risk_status }}
           </div>
           <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-top:8px;">
-            Capital: ${{ "{:,.0f}".format(settings.capital) }}<br>
+            Capital: {% if settings.capital %}${{ "{:,.0f}".format(settings.capital) }}{% else %}тохируулаагүй{% endif %}<br>
             Max position: {{ settings.max_position }}%
           </div>
         </section>
@@ -100,7 +107,7 @@
 
       <div class="nav-row centered" style="margin-top:1.5rem;">
         <a href="/decision" class="btn btn-ghost">Дахин тооцоолох</a>
-        <a href="/history" class="btn btn-primary">History →</a>
+        <a href="/trade-log" class="btn btn-primary">Trade Log →</a>
       </div>
       {% endif %}
 

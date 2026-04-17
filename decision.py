@@ -21,22 +21,37 @@ def get_action(score: float) -> str:
         return "NO ACTION"
 
 
-def get_execution(position_value: float) -> str:
-    if position_value == 0:
-        return "Худалдаж авахгүй"
+def get_execution(score: float, position_value: float, capital: float) -> str:
+    action = get_action(score)
+
+    if action == "NO ACTION":
+        return "Энэ хувьцааг авахгүй. Score хэт бага."
+
+    if capital == 0:
+        if score >= 85:
+            return "BUY — Capital тохируулаагүй байна. Settings-д capital оруулна уу."
+        return "SMALL POSITION — Capital тохируулаагүй байна. Settings-д capital оруулна уу."
+
     if position_value > 5000:
         return "DCA — 3-5 удаа хуваан авах"
-    return "Нэг удаа эсвэл 2 алхмаар авах"
+    elif position_value > 1000:
+        return "2 алхмаар авах"
+    else:
+        return "Нэг удаа авах"
 
 
 def calculate_decision(score: float, capital: float, max_position: float) -> dict:
     size_pct = get_position_size(score, max_position)
     position_value = capital * (size_pct / 100)
     action = get_action(score)
-    execution = get_execution(position_value)
+    execution = get_execution(score, position_value, capital)
 
     risk_ok = size_pct <= max_position
     risk_status = "OK" if risk_ok else f"Position хэт том — max {max_position}%"
+
+    warnings = []
+    if capital == 0:
+        warnings.append("⚠ Capital тохируулаагүй — Settings-д оруулна уу")
 
     return {
         "action": action,
@@ -45,4 +60,5 @@ def calculate_decision(score: float, capital: float, max_position: float) -> dic
         "execution": execution,
         "risk_status": risk_status,
         "risk_ok": risk_ok,
+        "warnings": warnings,
     }

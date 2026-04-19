@@ -186,3 +186,8 @@ def delete_deepwork(session_id):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+@app.route("/demo")
+def demo():
+    return "Demo горим түр зогсоосон байна.", 503

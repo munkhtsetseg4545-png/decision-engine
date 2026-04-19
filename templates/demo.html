@@ -15,156 +15,99 @@
       <div class="logo-mark">DE</div>
       <div class="header-title">
         <span class="header-layer">Demo</span>
-        <span class="header-name">90 мин системийн жишээ</span>
+        <span class="header-name">Auto Analysis</span>
       </div>
       <div class="header-right">
         <a href="/" class="history-link">← Нүүр</a>
       </div>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="demoProgress" style="width:0%"></div>
-    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </header>
 
   <main class="main">
     <div class="quiz-shell" style="max-width:680px;">
 
-      <!-- Ticker сонгох -->
-      <div id="step0" class="q-card">
-        <div class="q-meta-row"><span class="q-cat">Demo горим</span></div>
-        <p class="q-text" style="font-size:18px;margin-bottom:1.5rem;">
-          Хувьцаа сонгоход систем автоматаар бүх layer-г ажиллуулж харуулна.
-        </p>
+      <!-- Step 1: Ticker сонгох -->
+      <div id="step1">
+        <div class="ticker-card">
+          <p class="ticker-label">Demo — Хувьцаа сонгох</p>
+          <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin-bottom:1rem;">
+            yfinance-аар бодит өгөгдөл татаж, AI thesis үүсгэж, auto score тооцоолно
+          </p>
 
-        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.5rem;">
-          {% for t in ["AAPL","MSFT","NVDA","GOOGL","META","AMD","TSLA","AMZN"] %}
-          <button class="btn btn-ghost" style="font-family:var(--font-mono);font-size:13px;"
-            onclick="selectTicker('{{ t }}')">{{ t }}</button>
-          {% endfor %}
-        </div>
+          <div class="demo-tickers">
+            {% for t in ["AAPL","MSFT","NVDA","META","AMD","GOOGL","TSLA","AMZN"] %}
+            <button class="demo-ticker-btn" onclick="selectTicker('{{ t }}')">{{ t }}</button>
+            {% endfor %}
+          </div>
 
-        <div style="display:flex;gap:0.75rem;align-items:center;">
-          <input type="text" id="customTicker" class="ticker-input"
-            placeholder="Өөр ticker..." maxlength="10"
-            style="max-width:180px;font-size:18px;">
-          <button class="btn btn-ghost" onclick="selectTicker(document.getElementById('customTicker').value)">
-            Оруулах →
-          </button>
-        </div>
-      </div>
+          <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-3);margin:1rem 0 0.5rem;">эсвэл өөрийн ticker:</p>
+          <input type="text" id="customTicker" class="ticker-input" placeholder="Ticker..." maxlength="10"
+            style="max-width:200px;font-size:20px;" onkeydown="if(event.key==='Enter') startDemo()">
 
-      <!-- Loading -->
-      <div id="stepLoading" class="q-card hidden" style="text-align:center;padding:3rem;">
-        <div style="font-family:var(--font-mono);font-size:13px;color:var(--gold);" id="loadingMsg">
-          Өгөгдөл татаж байна...
-        </div>
-        <div style="margin-top:1rem;font-family:var(--font-mono);font-size:11px;color:var(--ink-3);" id="loadingTicker"></div>
-      </div>
-
-      <!-- Layer 1 -->
-      <div id="step1" class="hidden">
-        <div class="q-counter" style="margin-bottom:0.75rem;">
-          Layer 1 — Deep Work
-          <span class="q-ticker" id="s1ticker"></span>
-        </div>
-
-        <div class="result-section full-width" style="margin-bottom:1rem;">
-          <h3 class="section-heading">Зах зээлийн мэдээлэл</h3>
-          <div id="stockInfo" style="font-family:var(--font-mono);font-size:12px;line-height:2;color:var(--ink-2);"></div>
-        </div>
-
-        <div class="result-section full-width" style="margin-bottom:1rem;">
-          <h3 class="section-heading">AI thesis</h3>
-          <div id="thesisContent" class="thesis-box" style="font-size:12px;"></div>
-        </div>
-
-        <div class="nav-row">
-          <button class="btn btn-primary" onclick="showStep(2)">Layer 2 Scoring харах →</button>
+          <div class="nav-row" style="margin-top:1.5rem;">
+            <button class="btn btn-primary" id="btnStart" onclick="startDemo()" disabled>
+              Demo ажиллуулах →
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Layer 2 -->
+      <!-- Step 2: Loading -->
       <div id="step2" class="hidden">
-        <div class="q-counter" style="margin-bottom:0.75rem;">
-          Layer 2 — Scoring
-          <span class="q-ticker" id="s2ticker"></span>
+        <div class="ticker-card" style="text-align:center;">
+          <div class="q-ticker" id="loadingTicker" style="font-size:28px;margin-bottom:1rem;"></div>
+          <div class="demo-progress">
+            <div class="demo-step" id="s1">⏳ Өгөгдөл татаж байна...</div>
+            <div class="demo-step hidden" id="s2">⏳ AI thesis үүсгэж байна...</div>
+            <div class="demo-step hidden" id="s3">⏳ Score тооцоолж байна...</div>
+            <div class="demo-step hidden" id="s4">⏳ Хадгалж байна...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Result -->
+      <div id="step3" class="hidden">
+        <div id="errorBox" class="hidden hard-fail-notice" style="display:none;margin-bottom:1rem;"></div>
+
+        <!-- Stock info -->
+        <div class="q-card" style="margin-bottom:1rem;" id="stockCard">
+          <div class="q-meta-row">
+            <span class="q-cat" id="resStock"></span>
+            <span class="q-ticker" id="resSector"></span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-top:0.75rem;" id="statsGrid"></div>
         </div>
 
-        <div class="result-hero" style="margin-bottom:1rem;">
+        <!-- Score -->
+        <div class="result-hero" style="margin-bottom:1rem;" id="scoreCard">
           <div class="result-score-wrap">
             <svg class="score-ring" viewBox="0 0 120 120">
               <circle class="ring-bg" cx="60" cy="60" r="52"/>
-              <circle class="ring-fill" id="scoreRing" cx="60" cy="60" r="52"
+              <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
                 stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
             </svg>
             <div class="result-score-inner">
-              <span class="result-score-num" id="scoreNum">—</span>
+              <span class="result-score-num" id="resScore">—</span>
               <span class="result-score-denom">/100</span>
             </div>
           </div>
           <div class="result-verdict">
-            <div class="verdict-badge" id="scoreBadge"></div>
-            <p class="verdict-interp" id="scoreInterp"></p>
+            <div class="result-ticker-badge" id="resTicker2"></div>
+            <div class="verdict-badge" id="resBadge"></div>
+            <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink-3);margin-top:0.5rem;" id="resNote"></div>
           </div>
         </div>
 
-        <div id="redFlagsWrap"></div>
+        <!-- Thesis -->
+        <section class="result-section full-width" style="margin-bottom:1rem;">
+          <h3 class="section-heading">Investment Thesis (AI)</h3>
+          <div class="thesis-box" id="resThesis"></div>
+        </section>
 
-        <div class="result-section full-width" style="margin-bottom:1rem;">
-          <h3 class="section-heading">Асуулт бүрийн оноо</h3>
-          <div class="q-scores-grid" id="scoreGrid"></div>
-        </div>
-
-        <div class="nav-row">
-          <button class="btn btn-ghost" onclick="showStep(1)">← Layer 1</button>
-          <button class="btn btn-primary" onclick="showStep(3)">Layer 3 Decision харах →</button>
-        </div>
-      </div>
-
-      <!-- Layer 3 -->
-      <div id="step3" class="hidden">
-        <div class="q-counter" style="margin-bottom:0.75rem;">
-          Layer 3 — Decision
-          <span class="q-ticker" id="s3ticker"></span>
-        </div>
-
-        <div class="result-grid" style="margin-bottom:1rem;">
-          <section class="result-section">
-            <h3 class="section-heading">Action</h3>
-            <div class="verdict-badge" id="actionBadge" style="display:inline-block;"></div>
-          </section>
-          <section class="result-section">
-            <h3 class="section-heading">Position size</h3>
-            <div style="font-family:var(--font-display);font-size:32px;font-weight:600;color:var(--gold);" id="posSize">—</div>
-            <div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-3);" id="posValue"></div>
-          </section>
-          <section class="result-section full-width">
-            <h3 class="section-heading">Execution</h3>
-            <div class="sizing-box" id="execPlan"></div>
-          </section>
-        </div>
-
-        <div class="nav-row">
-          <button class="btn btn-ghost" onclick="showStep(2)">← Layer 2</button>
-          <button class="btn btn-primary" onclick="showStep(4)">Layer 4 Trade Log →</button>
-        </div>
-      </div>
-
-      <!-- Layer 4 -->
-      <div id="step4" class="hidden">
-        <div class="q-counter" style="margin-bottom:0.75rem;">
-          Layer 4 — Trade Log
-          <span class="q-ticker" id="s4ticker"></span>
-        </div>
-
-        <div class="result-section full-width" style="margin-bottom:1rem;">
-          <h3 class="section-heading">Хадгалагдсан trade</h3>
-          <div id="tradeCard" style="font-family:var(--font-mono);font-size:12px;line-height:2;color:var(--ink-2);"></div>
-        </div>
-
-        <div class="nav-row">
-          <button class="btn btn-ghost" onclick="showStep(3)">← Layer 3</button>
-          <a href="/analytics" class="btn btn-primary">Layer 5 Analytics →</a>
+        <div class="nav-row centered">
+          <button class="btn btn-ghost" onclick="resetDemo()">Дахин хийх</button>
+          <a href="/scoring" class="btn btn-primary">Layer 2 Scoring →</a>
         </div>
       </div>
 
@@ -173,154 +116,116 @@
 </div>
 
 <script>
-let demoData = null;
 let selectedTicker = "";
 
-const STEPS = [0,1,2,3,4];
-const PROGRESS = [0, 25, 50, 75, 100];
-
-function showStep(n) {
-  STEPS.forEach(i => {
-    const el = document.getElementById(i === 0 ? 'step0' : 'step' + i);
-    if (el) el.classList.add('hidden');
-  });
-  document.getElementById('stepLoading').classList.add('hidden');
-  const target = document.getElementById(n === 0 ? 'step0' : 'step' + n);
-  if (target) target.classList.remove('hidden');
-  document.getElementById('demoProgress').style.width = PROGRESS[n] + '%';
-}
-
 function selectTicker(t) {
-  t = t.trim().toUpperCase();
-  if (!t) return;
   selectedTicker = t;
-  runDemo(t);
+  document.getElementById('customTicker').value = t;
+  document.querySelectorAll('.demo-ticker-btn').forEach(b => b.classList.remove('demo-active'));
+  event.target.classList.add('demo-active');
+  document.getElementById('btnStart').disabled = false;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const inp = document.getElementById('customTicker');
-  if (inp) inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter') selectTicker(inp.value);
-  });
+document.getElementById('customTicker').addEventListener('input', function() {
+  selectedTicker = this.value.trim().toUpperCase();
+  document.getElementById('btnStart').disabled = !selectedTicker;
+  document.querySelectorAll('.demo-ticker-btn').forEach(b => b.classList.remove('demo-active'));
 });
 
-async function runDemo(ticker) {
-  document.getElementById('step0').classList.add('hidden');
-  document.getElementById('stepLoading').classList.remove('hidden');
-  document.getElementById('loadingTicker').textContent = ticker;
+async function startDemo() {
+  const ticker = document.getElementById('customTicker').value.trim().toUpperCase() || selectedTicker;
+  if (!ticker) return;
 
-  const msgs = [
-    `${ticker} өгөгдөл татаж байна...`,
-    `AI thesis үүсгэж байна...`,
-    `Score тооцоолж байна...`,
-    `Decision гаргаж байна...`,
-  ];
-  let mi = 0;
-  const msgEl = document.getElementById('loadingMsg');
-  const interval = setInterval(() => {
-    msgEl.textContent = msgs[mi % msgs.length];
-    mi++;
-  }, 1500);
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('loadingTicker').textContent = ticker;
+  document.getElementById('progressFill').style.width = '25%';
+
+  await delay(300);
+  show('s2');
+  document.getElementById('progressFill').style.width = '50%';
+
+  await delay(300);
+  show('s3');
+  document.getElementById('progressFill').style.width = '75%';
 
   try {
-    const res = await fetch('/api/demo?ticker=' + ticker);
+    const res = await fetch('/api/demo/' + ticker);
     const data = await res.json();
-    clearInterval(interval);
+
+    show('s4');
+    document.getElementById('progressFill').style.width = '100%';
+    await delay(500);
+
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.remove('hidden');
 
     if (data.error) {
-      msgEl.textContent = '⚠ Алдаа: ' + data.error;
+      const eb = document.getElementById('errorBox');
+      eb.textContent = data.error;
+      eb.style.display = 'block';
       return;
     }
 
-    demoData = data;
-    renderAll(data);
-    showStep(1);
+    const d = data.stock_data;
+    document.getElementById('resStock').textContent = d.name + ' (' + d.ticker + ')';
+    document.getElementById('resSector').textContent = d.sector;
+
+    const stats = [
+      { label: 'Үнэ', val: '$' + d.price },
+      { label: 'P/E', val: d.pe || 'N/A' },
+      { label: 'Market cap', val: data.market_cap_fmt },
+      { label: 'Beta', val: d.beta },
+      { label: 'ROE', val: d.roe ? d.roe + '%' : 'N/A' },
+      { label: 'Rev growth', val: d.rev_growth ? d.rev_growth + '%' : 'N/A' },
+      { label: 'Profit margin', val: d.profit_margin ? d.profit_margin + '%' : 'N/A' },
+      { label: 'D/E', val: d.debt_equity || 'N/A' },
+    ];
+    document.getElementById('statsGrid').innerHTML = stats.map(s =>
+      `<div style="background:var(--parchment-2);padding:6px 8px;border-radius:var(--radius);">
+        <div style="font-family:var(--font-mono);font-size:9px;color:var(--gold-dim);">${s.label}</div>
+        <div style="font-family:var(--font-mono);font-size:13px;color:var(--ink);">${s.val}</div>
+      </div>`
+    ).join('');
+
+    const score = data.score.total_score;
+    document.getElementById('resScore').textContent = score;
+    document.getElementById('resTicker2').textContent = d.ticker;
+    document.getElementById('resNote').textContent = 'Auto-scored бодит өгөгдлөөс';
+
+    const badge = document.getElementById('resBadge');
+    if (score >= 85) { badge.textContent = 'BUY'; badge.className = 'verdict-badge badge-go'; }
+    else if (score >= 70) { badge.textContent = 'SMALL POSITION'; badge.className = 'verdict-badge badge-watch'; }
+    else { badge.textContent = 'NO ACTION'; badge.className = 'verdict-badge badge-nogo'; }
+
+    setTimeout(() => {
+      const offset = 326.7 - (score / 100 * 326.7);
+      document.getElementById('ringFill').style.strokeDashoffset = offset;
+    }, 100);
+
+    document.getElementById('resThesis').textContent = data.thesis;
+
   } catch(e) {
-    clearInterval(interval);
-    msgEl.textContent = '⚠ Алдаа гарлаа: ' + e.message;
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.remove('hidden');
+    const eb = document.getElementById('errorBox');
+    eb.textContent = 'Алдаа гарлаа: ' + e.message;
+    eb.style.display = 'block';
   }
 }
 
-function renderAll(d) {
-  const t = d.stock_data.ticker;
-  ['s1ticker','s2ticker','s3ticker','s4ticker'].forEach(id => {
-    document.getElementById(id).textContent = t;
-  });
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // Layer 1
-  const sd = d.stock_data;
-  document.getElementById('stockInfo').innerHTML = `
-    <b>${sd.name}</b> — ${sd.sector} / ${sd.industry}<br>
-    Үнэ: $${sd.price} &nbsp;|&nbsp; P/E: ${sd.pe} &nbsp;|&nbsp; Market cap: ${sd.market_cap}<br>
-    Revenue: ${sd.revenue} &nbsp;|&nbsp; Profit margin: ${sd.profit_margin}<br>
-    ROE: ${sd.roe} &nbsp;|&nbsp; Debt/Equity: ${sd.debt_equity} &nbsp;|&nbsp; Beta: ${sd.beta}<br>
-    52W: $${sd.week_52_low} – $${sd.week_52_high} &nbsp;|&nbsp; Analyst target: $${sd.analyst_target} (${sd.upside}%)<br>
-    Recommendation: ${sd.recommendation} &nbsp;|&nbsp; Dividend: ${sd.dividend_yield}
-  `;
-
-  const a = d.answers;
-  const labels = {
-    what_do:'Бизнес', revenue:'Орлого', product:'Бүтээгдэхүүн',
-    moat:'Competitive advantage', management:'Удирдлага', growth:'Өсөлт',
-    risks:'Эрсдэл', downside:'Worst case', valuation:'Үнэлгээ'
-  };
-  let thesis = '';
-  for (const [k, label] of Object.entries(labels)) {
-    thesis += `<b>${label}:</b> ${a[k] || '—'}\n`;
-  }
-  document.getElementById('thesisContent').textContent = thesis;
-
-  // Layer 2
-  const sc = d.score;
-  document.getElementById('scoreNum').textContent = sc.score;
-  const offset = 326.7 - (sc.score / 100 * 326.7);
-  setTimeout(() => {
-    document.getElementById('scoreRing').style.strokeDashoffset = offset;
-  }, 100);
-
-  const badge = document.getElementById('scoreBadge');
-  badge.textContent = sc.decision;
-  badge.className = 'verdict-badge ' + (
-    sc.decision === 'STRONG BUY / ADD' ? 'badge-go' :
-    sc.decision === 'SMALL POSITION / WATCHLIST' ? 'badge-watch' :
-    sc.decision === 'HOLD / NEED MORE WORK' ? 'badge-hold' : 'badge-nogo'
-  );
-  document.getElementById('scoreInterp').textContent = sc.interpretation;
-
-  let flagHtml = '';
-  if (sc.red_flags && sc.red_flags.length) {
-    sc.red_flags.forEach(f => { flagHtml += `<div class="flag-item">${f}</div>`; });
-  }
-  document.getElementById('redFlagsWrap').innerHTML = flagHtml;
-
-  let qgHtml = '';
-  if (sc.normalized_scores) {
-    for (const [key, val] of Object.entries(sc.normalized_scores)) {
-      qgHtml += `<div class="qs-item"><span class="qs-key">${key.replace(/_/g,' ')}</span><span class="qs-val">${val}/10</span></div>`;
-    }
-  }
-  document.getElementById('scoreGrid').innerHTML = qgHtml;
-
-  // Layer 3
-  const dec = d.decision;
-  const ab = document.getElementById('actionBadge');
-  ab.textContent = dec.action;
-  ab.className = 'verdict-badge ' + (
-    dec.action === 'BUY' ? 'badge-go' :
-    dec.action === 'SMALL POSITION' ? 'badge-watch' : 'badge-nogo'
-  );
-  document.getElementById('posSize').textContent = dec.size_pct + '%';
-  document.getElementById('posValue').textContent = dec.position_value > 0 ? '$' + dec.position_value.toLocaleString() : 'Capital тохируулаагүй';
-  document.getElementById('execPlan').textContent = dec.execution;
-
-  // Layer 4
-  document.getElementById('tradeCard').innerHTML = `
-    Ticker: <b>${t}</b><br>
-    Score: ${sc.score}/100<br>
-    Action: ${dec.action}<br>
-    Position size: ${dec.size_pct}%<br>
-    Status: open (demo)
-  `;
+function resetDemo() {
+  selectedTicker = "";
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  document.getElementById('customTicker').value = '';
+  document.getElementById('btnStart').disabled = true;
+  document.getElementById('progressFill').style.width = '0%';
+  document.querySelectorAll('.demo-ticker-btn').forEach(b => b.classList.remove('demo-active'));
+  document.getElementById('ringFill').style.strokeDashoffset = '326.7';
 }
 </script>
 </body>

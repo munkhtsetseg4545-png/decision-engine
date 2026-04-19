@@ -60,37 +60,21 @@ def generate_ai_conclusion(ticker: str, answers: Dict[str, str]) -> str:
         return "API key тохируулагдаагүй."
 
     a = answers
-    prompt = f"""Та {ticker} хувьцааны судалгааг уншиж байна. Монгол хэрэглэгчид зориулан энгийн, шууд үгээр дүгнэлт бич. Академик эсвэл хэт томоохон үг бүү хэрэглэ. Найздаа ярихтай адил тодорхой бич.
+    prompt = f"""{ticker} судалгаа:
+Бизнес: {a.get('what_do','')} | Орлого: {a.get('revenue','')} | Moat: {a.get('moat','')}
+Удирдлага: {a.get('management','')} | Өсөлт: {a.get('growth','')}
+Эрсдэл: {a.get('risks','')} | Үнэлгээ: {a.get('valuation','')}
 
-Markdown (#, *, **) огт бүү ашигла. Зөвхөн энгийн текст.
-
-Яг дараах бүтцээр бич:
-
-BUSINESS ДҮГНЭЛТ
-[Энэ компани юу хийдэг, мөнгөө яаж олдог талаар 2 энгийн өгүүлбэр]
-
-MOAT & MANAGEMENT ДҮГНЭЛТ
-[Өрсөлдөгчдөөс хэр ялгаатай, удирдлага хэр итгэмжтэй талаар 2 энгийн өгүүлбэр]
-
-RISK & VALUATION ДҮГНЭЛТ
-[Хамгийн аймаар эрсдэл нь юу, үнэ нь зохистой эсэх талаар 2 энгийн өгүүлбэр]
-
-Судалгааны мэдээлэл:
-Бизнес: {a.get('what_do','')}
-Орлого: {a.get('revenue','')}
-Бүтээгдэхүүн: {a.get('product','')}
-Moat: {a.get('moat','')}
-Удирдлага: {a.get('management','')}
-Өсөлт: {a.get('growth','')}
-Эрсдэл: {a.get('risks','')}
-Worst case: {a.get('downside','')}
-Үнэлгээ: {a.get('valuation','')}"""
+Монголоор ЗӨВХӨН 3 мөр бич. Markdown бүү ашигла. Тус бүр 3-5 үг:
+Бизнес: [нэг хэллэг, жишээ нь: Тогтвортой, өргөн moat-тай]
+Эрсдэл: [нэг хэллэг, жишээ нь: Геополитик эрсдэл өндөр]
+Дүгнэлт: [нэг хэллэг, жишээ нь: Судлах үнэ цэнэтэй]"""
 
     try:
         client = anthropic.Anthropic(api_key=api_key)
         msg = client.messages.create(
             model="claude-haiku-4-5-20251001",
-            max_tokens=600,
+            max_tokens=150,
             messages=[{"role": "user", "content": prompt}]
         )
         return msg.content[0].text
